@@ -131,6 +131,12 @@ export default function EventsPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = getAuthToken();
+    setIsLoggedIn(!!token);
+  }, []);
 
   const filteredFests = useMemo(() => {
     const normalized = searchTerm.trim().toLowerCase();
@@ -210,9 +216,11 @@ export default function EventsPage() {
             <Link href="/" className="text-white/70 hover:text-white transition-colors">
               Home
             </Link>
-            <Link href="/login" className="text-white/70 hover:text-white transition-colors">
-              Login
-            </Link>
+            {!isLoggedIn && (
+              <Link href="/login" className="text-white/70 hover:text-white transition-colors">
+                Login
+              </Link>
+            )}
           </nav>
           <div className="flex items-center gap-2 scale-75">
             <CartoonButton label="HOST+" color="bg-white" onClick={handleHostClick} />

@@ -3,6 +3,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 export interface SignUpData {
   name: string;
   email: string;
+  phone?: string;
   password: string;
   college?: string;
   role?: "student" | "organizer" | "admin";

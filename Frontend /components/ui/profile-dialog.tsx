@@ -3,6 +3,8 @@
 import { useCharacterLimit } from "@/components/hooks/use-character-limit";
 import { useImageUpload } from "@/components/hooks/use-image-upload";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect, useId } from "react";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogClose,
@@ -17,7 +19,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Check, ImagePlus, X } from "lucide-react";
-import { useId, useState } from "react";
 
 function ProfileBg({ defaultImage }: { defaultImage?: string }) {
   const [hideDefault, setHideDefault] = useState(false);
@@ -116,7 +117,44 @@ function Avatar({ defaultImage }: { defaultImage?: string }) {
 
 export function ProfileDialog({ children }: { children: React.ReactNode }) {
   const id = useId();
+  const router = useRouter();
   const maxLength = 180;
+  const [userData, setUserData] = useState<{
+    name: string;
+    email: string;
+    phone: string | null;
+    college: string | null;
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:8000/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setUserData(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const {
     value,
@@ -127,6 +165,12 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
     maxLength,
     initialValue: "Hey there! I'm a student passionate about college fests and events.",
   });
+
+  const handleLogout = () => {
+    localStorage.removeItem('auth_token');
+    router.push('/');
+    window.location.reload();
+  };
 
   return (
     <Dialog>
@@ -143,65 +187,56 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
           Make changes to your profile here. You can change your photo and set a username.
         </DialogDescription>
         <div className="overflow-y-auto">
-          <ProfileBg defaultImage="https://images.unsplash.com/photo-1557683316-973673baf926?w=800&h=200&fit=crop" />
+          <div className="h-20 bg-gradient-to-br from-purple-600 to-blue-600"></div>
           <Avatar defaultImage="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop" />
           <div className="px-6 pb-6 pt-4">
             <form className="space-y-4">
-              <div className="flex flex-col gap-4 sm:flex-row">
-                <div className="flex-1 space-y-2">
-                  <Label htmlFor={`${id}-first-name`} className="text-white">First name</Label>
-                  <Input
-                    id={`${id}-first-name`}
-                    placeholder="John"
-                    type="text"
-                    required
-                    className="bg-white/5 border-white/10 text-white"
-                  />
-                </div>
-                <div className="flex-1 space-y-2">
-                  <Label htmlFor={`${id}-last-name`} className="text-white">Last name</Label>
-                  <Input
-                    id={`${id}-last-name`}
-                    placeholder="Doe"
-                    type="text"
-                    required
-                    className="bg-white/5 border-white/10 text-white"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`${id}-username`} className="text-white">Username</Label>
-                <div className="relative">
-                  <Input
-                    id={`${id}-username`}
-                    className="peer pe-9 bg-white/5 border-white/10 text-white"
-                    placeholder="Username"
-                    type="text"
-                    required
-                  />
-                  <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center justify-center pe-3 text-muted-foreground/80 peer-disabled:opacity-50">
-                    <Check
-                      size={16}
-                      strokeWidth={2}
-                      className="text-emerald-500"
-                      aria-hidden="true"
+              {isLoading ? (
+                <div className="text-white/60 text-center py-4">Loading profile...</div>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor={`${id}-full-name`} className="text-white">Full Name</Label>
+                    <Input
+                      id={`${id}-full-name`}
+                      placeholder="John Doe"
+                      value={userData?.name || ''}
+                      type="text"
+                      disabled
+                      className="bg-white/5 border-white/10 text-white opacity-60 cursor-not-allowed"
                     />
                   </div>
-                </div>
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`${id}-email`} className="text-white">Email</Label>
+                    <Input
+                      id={`${id}-email`}
+                      placeholder="john@example.com"
+                      value={userData?.email || ''}
+                      type="email"
+                      disabled
+                      className="bg-white/5 border-white/10 text-white opacity-60 cursor-not-allowed"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`${id}-phone`} className="text-white">Phone Number</Label>
+                    <Input
+                      id={`${id}-phone`}
+                      placeholder="+91 98765 43210"
+                      value={userData?.phone || ''}
+                      type="tel"
+                      disabled
+                      className="bg-white/5 border-white/10 text-white opacity-60 cursor-not-allowed"
+                    />
+                  </div>
               <div className="space-y-2">
-                <Label htmlFor={`${id}-website`} className="text-white">Website</Label>
-                <div className="flex rounded-lg shadow-sm shadow-black/5">
-                  <span className="-z-10 inline-flex items-center rounded-s-lg border border-white/10 bg-white/5 px-3 text-sm text-white/60">
-                    https://
-                  </span>
-                  <Input
-                    id={`${id}-website`}
-                    className="-ms-px rounded-s-none shadow-none bg-white/5 border-white/10 text-white"
-                    placeholder="yourwebsite.com"
-                    type="text"
-                  />
-                </div>
+                <Label htmlFor={`${id}-organization`} className="text-white">College / Organization Name</Label>
+                <Input
+                  id={`${id}-organization`}
+                  placeholder="e.g., IIT Delhi, BITS Pilani"
+                  value={userData?.college || ''}
+                  type="text"
+                  className="bg-white/5 border-white/10 text-white"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor={`${id}-bio`} className="text-white">Biography</Label>
@@ -223,18 +258,32 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
                   <span className="tabular-nums">{limit - characterCount}</span> characters left
                 </p>
               </div>
+              </>
+              )}
             </form>
           </div>
         </div>
         <DialogFooter className="border-t border-white/10 px-6 py-4">
-          <DialogClose asChild>
-            <Button type="button" variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10">
-              Cancel
+          <div className="flex w-full items-center justify-between">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleLogout}
+              className="bg-red-600/10 border-red-600/30 text-red-500 hover:bg-red-600/20 hover:border-red-600/50"
+            >
+              Logout
             </Button>
-          </DialogClose>
-          <DialogClose asChild>
-            <Button type="button" className="bg-blue-600 hover:bg-blue-700 text-white">Save changes</Button>
-          </DialogClose>
+            <div className="flex gap-2">
+              <DialogClose asChild>
+                <Button type="button" variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10">
+                  Cancel
+                </Button>
+              </DialogClose>
+              <DialogClose asChild>
+                <Button type="button" className="bg-blue-600 hover:bg-blue-700 text-white">Save changes</Button>
+              </DialogClose>
+            </div>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

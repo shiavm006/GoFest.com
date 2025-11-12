@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import { connectDB } from "./config/database.js";
 import authRoutes from "./routes/auth.js";
 import festRoutes from "./routes/fests.js";
+import registrationRoutes from "./routes/registrations.js";
+import locationRoutes from "./routes/location.js";
 
 dotenv.config();
 
@@ -29,6 +31,8 @@ app.get("/health", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/fests", festRoutes);
+app.use("/api/registrations", registrationRoutes);
+app.use("/api/location", locationRoutes);
 
 app.use((err, req, res, next) => {
   console.error("Error:", err);

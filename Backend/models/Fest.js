@@ -79,6 +79,10 @@ const festSchema = new mongoose.Schema({
     type: String,
     default: "Free"
   },
+  entryFee: {
+    type: Number,
+    default: 0
+  },
   expectedFootfall: {
     type: String,
     default: null
@@ -87,9 +91,27 @@ const festSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  brochure: {
+    type: String,
+    default: null
+  },
   events: {
     type: [eventSchema],
     default: []
+  },
+  hostedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  registrationsCount: {
+    type: Number,
+    default: 0
+  },
+  status: {
+    type: String,
+    enum: ['draft', 'published', 'cancelled', 'completed'],
+    default: 'published'
   }
 }, {
   timestamps: true

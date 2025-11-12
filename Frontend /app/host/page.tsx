@@ -15,6 +15,12 @@ export default function HostFestPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingLocation, setIsLoadingLocation] = useState(false)
   const [error, setError] = useState("")
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const token = getAuthToken();
+    setIsLoggedIn(!!token);
+  }, []);
 
   const [festData, setFestData] = useState({
     name: "",
@@ -134,32 +140,35 @@ export default function HostFestPage() {
       async (position) => {
         try {
           const { latitude, longitude } = position.coords
+          const token = getAuthToken()
           
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`,
+            `http://localhost:8000/api/location/reverse-geocode?lat=${latitude}&lon=${longitude}`,
             {
               headers: {
-                'User-Agent': 'GoFest.com'
+                'Authorization': `Bearer ${token}`
               }
             }
           )
 
-          if (!response.ok) throw new Error("Failed to fetch location")
+          if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.detail || "Failed to fetch location")
+          }
 
           const data = await response.json()
-          const address = data.address
 
           setFestData({
             ...festData,
             location: {
               ...festData.location,
-              city: address.city || address.town || address.village || "",
-              state: address.state || "",
-              country: address.country || "India"
+              city: data.location.city,
+              state: data.location.state,
+              country: data.location.country
             }
           })
         } catch (err: any) {
-          setError("Could not fetch location details. Please enter manually.")
+          setError(err.message || "Could not fetch location details. Please enter manually.")
         } finally {
           setIsLoadingLocation(false)
         }
@@ -171,6 +180,11 @@ export default function HostFestPage() {
         } else {
           setError("Could not get your location. Please enter manually.")
         }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
       }
     )
   }
@@ -222,9 +236,11 @@ export default function HostFestPage() {
             <Link href="/events" className="text-white/70 hover:text-white transition-colors">
               Events
             </Link>
-            <Link href="/login" className="text-white/70 hover:text-white transition-colors">
-              Login
-            </Link>
+            {!isLoggedIn && (
+              <Link href="/login" className="text-white/70 hover:text-white transition-colors">
+                Login
+              </Link>
+            )}
           </nav>
           <div className="flex items-center gap-2 scale-75">
             <CartoonButton label="HOST+" color="bg-white" onClick={() => router.push("/host")} />
@@ -249,7 +265,7 @@ export default function HostFestPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-12">
-            <section className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-8">
+            <section className="space-y-4">
               <div className="flex items-center gap-3 mb-6">
                 <Calendar className="w-6 h-6 text-white" />
                 <h2 className="text-2xl font-bold text-white">Basic Information</h2>
@@ -335,7 +351,7 @@ export default function HostFestPage() {
               </div>
             </section>
 
-            <section className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-8">
+            <section className="space-y-4">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <MapPin className="w-6 h-6 text-white" />
@@ -385,7 +401,7 @@ export default function HostFestPage() {
               </div>
             </section>
 
-            <section className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-8">
+            <section className="space-y-4">
               <div className="flex items-center gap-3 mb-6">
                 <Users className="w-6 h-6 text-white" />
                 <h2 className="text-2xl font-bold text-white">Organizer Details</h2>
@@ -433,7 +449,7 @@ export default function HostFestPage() {
               </div>
             </section>
 
-            <section className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-8">
+            <section className="space-y-4">
               <div className="flex items-center gap-3 mb-6">
                 <Image className="w-6 h-6 text-white" />
                 <h2 className="text-2xl font-bold text-white">Images & Media</h2>
@@ -481,7 +497,7 @@ export default function HostFestPage() {
               </div>
             </section>
 
-            <section className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-8">
+            <section className="space-y-4">
               <div className="flex items-center gap-3 mb-6">
                 <IndianRupee className="w-6 h-6 text-white" />
                 <h2 className="text-2xl font-bold text-white">Pricing</h2>
@@ -523,7 +539,7 @@ export default function HostFestPage() {
               </div>
             </section>
 
-            <section className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-8">
+            <section className="space-y-4">
               <div className="flex items-center gap-3 mb-6">
                 <Plus className="w-6 h-6 text-white" />
                 <h2 className="text-2xl font-bold text-white">Events</h2>

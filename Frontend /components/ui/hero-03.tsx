@@ -7,15 +7,21 @@ import { BadgeHelp, Instagram, Twitter, Heart } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAuthToken } from "@/lib/api";
-import React from "react";
+import { useState, useEffect } from "react";
 
 export function HeroSection03() {
   const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = getAuthToken();
+    setIsLoggedIn(!!token);
+  }, []);
 
   const handleHostClick = () => {
     const token = getAuthToken();
     if (!token) {
-      router.push("/");
+      router.push("/login");
     } else {
       router.push("/host");
     }
@@ -34,12 +40,14 @@ export function HeroSection03() {
               >
                 Home
               </Link>
-              <Link
-                href="/login"
-                className="text-gray-400 hover:opacity-60 transition-opacity cursor-pointer"
-              >
-                Login
-              </Link>
+              {!isLoggedIn && (
+                <Link
+                  href="/login"
+                  className="text-gray-400 hover:opacity-60 transition-opacity cursor-pointer"
+                >
+                  Login
+                </Link>
+              )}
             </nav>
             <div className="flex items-center gap-2 scale-75">
               <CartoonButton label="HOST+" color="bg-white" onClick={handleHostClick} />

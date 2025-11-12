@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post("/signup", async (req, res, next) => {
   try {
-    const { name, email, password, college, role } = req.body;
+    const { name, email, phone, password, college, role } = req.body;
     
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -21,16 +21,28 @@ router.post("/signup", async (req, res, next) => {
       });
     }
     
-    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
-    if (existingUser) {
+    // Check for duplicate email
+    const existingUserByEmail = await User.findOne({ email: email.toLowerCase().trim() });
+    if (existingUserByEmail) {
       return res.status(400).json({
-        detail: "Email already registered"
+        detail: "Email address already registered"
       });
+    }
+    
+    // Check for duplicate phone number
+    if (phone) {
+      const existingUserByPhone = await User.findOne({ phone: phone.trim() });
+      if (existingUserByPhone) {
+        return res.status(400).json({
+          detail: "Phone number already registered"
+        });
+      }
     }
     
     const user = new User({
       name: name.trim(),
       email: email.toLowerCase().trim(),
+      phone: phone ? phone.trim() : null,
       password,
       college: college ? college.trim() : null,
       role: role || "student"
@@ -124,6 +136,7 @@ router.get("/me", authenticate, async (req, res) => {
     id: req.user._id.toString(),
     name: req.user.name,
     email: req.user.email,
+    phone: req.user.phone,
     role: req.user.role,
     college: req.user.college,
     is_active: req.user.isActive

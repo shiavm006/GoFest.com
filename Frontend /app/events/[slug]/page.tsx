@@ -25,9 +25,19 @@ export default function FestDetailPage() {
   const handleHostClick = () => {
     const token = getAuthToken();
     if (!token) {
-      router.push("/");
+      router.push("/login");
     } else {
       router.push("/host");
+    }
+  };
+
+  const handleRegisterClick = () => {
+    const token = getAuthToken();
+    if (!token) {
+      router.push("/login");
+    } else {
+      // TODO: Implement registration modal or API call
+      alert("Registration feature coming soon! You are logged in.");
     }
   };
 
@@ -143,7 +153,10 @@ export default function FestDetailPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
-            <button className="bg-white text-black px-8 py-3 text-sm font-medium transition-opacity hover:opacity-90">
+            <button 
+              onClick={handleRegisterClick}
+              className="bg-white text-black px-8 py-3 text-sm font-medium transition-opacity hover:opacity-90 cursor-pointer"
+            >
               Register Now
             </button>
             {festData.website && (

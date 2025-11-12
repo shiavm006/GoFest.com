@@ -10,7 +10,7 @@ const sizes = {
   large: "h-12 text-base rounded-lg"
 };
 
-interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'prefix'> {
+interface InputProps {
   placeholder?: string;
   size?: keyof typeof sizes;
   prefix?: React.ReactNode | string;
@@ -24,9 +24,10 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, '
   onChange?: (value: string) => void;
   onFocus?: () => void;
   onBlur?: () => void;
-  inputRef?: React.RefObject<HTMLInputElement | null>;
+  ref?: React.RefObject<HTMLInputElement | null>;
   className?: string;
   wrapperClassName?: string;
+  [key: string]: any;
 }
 
 export const Input = ({
@@ -43,13 +44,13 @@ export const Input = ({
   onChange,
   onFocus,
   onBlur,
-  inputRef,
+  ref,
   className,
   wrapperClassName,
   ...rest
 }: InputProps) => {
   const [_value, set_value] = useState(value || "");
-  const _ref = inputRef ? inputRef : useRef<HTMLInputElement>(null);
+  const _ref = ref ? ref : useRef<HTMLInputElement>(null);
 
   const _onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     set_value(e.target.value);
@@ -67,7 +68,7 @@ export const Input = ({
   return (
     <div className="flex flex-col gap-2" onClick={() => _ref.current?.focus()}>
       {label && (
-        <div className="capitalize text-[13px] text-gray-900 dark:text-gray-300">
+        <div className="capitalize text-[13px] text-gray-900">
           {label}
         </div>
       )}

@@ -245,10 +245,11 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
     const formData = new FormData(event.currentTarget);
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
+    const phone = formData.get("phone") as string;
     const password = formData.get("password") as string;
 
     try {
-      await signUp({ name, email, password });
+      await signUp({ name, email, phone, password });
       setSuccess(true);
       setTimeout(() => {
         onSuccess?.();
@@ -279,6 +280,7 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
       <div className="grid gap-4">
         <div className="grid gap-1"><Label htmlFor="name">Full Name</Label><Input id="name" name="name" type="text" placeholder="John Doe" required autoComplete="name" /></div>
         <div className="grid gap-2"><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" placeholder="m@example.com" required autoComplete="email" /></div>
+        <div className="grid gap-2"><Label htmlFor="phone">Phone Number</Label><Input id="phone" name="phone" type="tel" placeholder="+91 98765 43210" required autoComplete="tel" /></div>
         <PasswordInput name="password" label="Password" required autoComplete="new-password" placeholder="Password"/>
         <Button type="submit" variant="outline" className="mt-2" disabled={isLoading || success}>
           {isLoading ? "Signing up..." : success ? "Success!" : "Sign Up"}
@@ -298,13 +300,6 @@ function AuthFormContainer({ isSignIn, onToggle }: { isSignIn: boolean; onToggle
                     {isSignIn ? "Sign up" : "Sign in"}
                 </Button>
             </div>
-            <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-                <span className="relative z-10 bg-background px-2 text-muted-foreground">Or continue with</span>
-            </div>
-            <Button variant="outline" type="button" onClick={() => console.log("UI: Google button clicked")}>
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google icon" className="mr-2 h-4 w-4" />
-                Continue with Google
-            </Button>
         </div>
     )
 }
