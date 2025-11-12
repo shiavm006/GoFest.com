@@ -27,9 +27,9 @@ export interface SuggestiveSearchProps {
   onChange?: (val: string) => void;
   suggestions?: string[];
   className?: string;
-  Leading?: () => JSX.Element;
+  Leading?: () => React.ReactElement;
   showLeading?: boolean;
-  Trailing?: () => JSX.Element;
+  Trailing?: () => React.ReactElement;
   showTrailing?: boolean;
   effect?: BuiltinEffect;
   EffectComponent?: React.ComponentType<EffectRendererProps>;
@@ -53,7 +53,7 @@ export const TypewriterEffect: React.FC<EffectRendererProps> = ({
   const [phase, setPhase] = useState<"typing" | "paused" | "deleting">(
     "typing"
   );
-  const timers = useRef<ReturnType<typeof window.setTimeout>[]>([]);
+  const timers = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
     setPhase("typing");
@@ -80,7 +80,7 @@ export const TypewriterEffect: React.FC<EffectRendererProps> = ({
       const t = window.setTimeout(
         () => onDeleteComplete?.(),
         Math.max(200, pauseAfterTypeMs)
-      );
+      ) as unknown as NodeJS.Timeout;
       timers.current.push(t);
       return () => timers.current.forEach(clearTimeout);
     }
@@ -133,7 +133,7 @@ export const TypewriterEffect: React.FC<EffectRendererProps> = ({
                 const t = window.setTimeout(
                   () => setPhase("deleting"),
                   pauseAfterTypeMs
-                );
+                ) as unknown as NodeJS.Timeout;
                 timers.current.push(t);
               }
             } else if (phase === "deleting") {
@@ -190,7 +190,7 @@ export const SlideEffect: React.FC<EffectRendererProps> = ({
   containerRef,
 }) => {
   const [phase, setPhase] = useState<"enter" | "pause" | "exit">("enter");
-  const timers = useRef<ReturnType<typeof window.setTimeout>[]>([]);
+  const timers = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
     setPhase("enter");
@@ -218,7 +218,7 @@ export const SlideEffect: React.FC<EffectRendererProps> = ({
       const t = window.setTimeout(
         () => onDeleteComplete?.(),
         Math.max(200, pauseAfterTypeMs)
-      );
+      ) as unknown as NodeJS.Timeout;
       timers.current.push(t);
       return () => timers.current.forEach(clearTimeout);
     }, [onDeleteComplete, pauseAfterTypeMs, allowDelete]);
@@ -259,7 +259,7 @@ export const SlideEffect: React.FC<EffectRendererProps> = ({
               const t = window.setTimeout(
                 () => setPhase("exit"),
                 pauseAfterTypeMs
-              );
+              ) as unknown as NodeJS.Timeout;
               timers.current.push(t);
             }
           } else if (phase === "exit") {
@@ -288,7 +288,7 @@ export const FadeEffect: React.FC<EffectRendererProps> = ({
   containerRef,
 }) => {
   const [phase, setPhase] = useState<"fadeIn" | "hold" | "fadeOut">("fadeIn");
-  const timers = useRef<ReturnType<typeof window.setTimeout>[]>([]);
+  const timers = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
     setPhase("fadeIn");
@@ -316,7 +316,7 @@ export const FadeEffect: React.FC<EffectRendererProps> = ({
       const t = window.setTimeout(
         () => onDeleteComplete?.(),
         Math.max(200, pauseAfterTypeMs)
-      );
+      ) as unknown as NodeJS.Timeout;
       timers.current.push(t);
       return () => timers.current.forEach(clearTimeout);
     }, [onDeleteComplete, pauseAfterTypeMs, allowDelete]);
@@ -356,7 +356,7 @@ export const FadeEffect: React.FC<EffectRendererProps> = ({
               const t = window.setTimeout(
                 () => setPhase("fadeOut"),
                 pauseAfterTypeMs
-              );
+              ) as unknown as NodeJS.Timeout;
               timers.current.push(t);
             }
           } else if (phase === "fadeOut") {
