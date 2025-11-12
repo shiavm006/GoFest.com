@@ -82,30 +82,6 @@ export default function FestDetailPage() {
     <div className="min-h-screen relative text-white">
       <div className="w-full absolute h-full z-0 bg-[radial-gradient(circle,_rgba(255,255,255,0.12)_1px,_transparent_1px)] opacity-20 [background-size:20px_20px]" />
       
-      <header className="sticky top-0 z-50 bg-black/60 backdrop-blur supports-[backdrop-filter]:bg-black/40 flex justify-between items-center px-8 py-6 gap-6 text-white">
-        <Link href="/" className="text-2xl font-extrabold tracking-tight whitespace-nowrap">
-          gofest.com
-        </Link>
-
-        <div className="flex items-center gap-2">
-          <nav className="hidden md:flex gap-6 text-sm">
-            <Link href="/" className="text-white/70 hover:text-white transition-colors">
-              Home
-            </Link>
-            <Link href="/events" className="text-white/70 hover:text-white transition-colors">
-              Events
-            </Link>
-            <Link href="/login" className="text-white/70 hover:text-white transition-colors">
-              Login
-            </Link>
-          </nav>
-          <div className="flex items-center gap-2 scale-75">
-            <CartoonButton label="HOST+" color="bg-white" onClick={handleHostClick} />
-          </div>
-          <ProfileButton />
-        </div>
-      </header>
-
       {/* 1. Hero Section */}
       <section className="relative w-full h-[70vh] min-h-[500px] overflow-hidden">
         <div 
@@ -116,15 +92,16 @@ export default function FestDetailPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" />
         
-        <div className="relative z-10 h-full flex flex-col justify-end px-6 md:px-12 lg:px-16 pb-16">
+        <div className="relative z-10 h-full flex flex-col px-6 md:px-12 lg:px-16 pt-8">
           <Link
             href="/events"
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors mb-8"
+            className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors mb-auto"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm">Back</span>
+            <span className="text-sm">Back to Events</span>
           </Link>
 
+          <div className="pb-16">
           <div className="mb-6">
             <span className="inline-block px-3 py-1 text-xs font-medium text-white/90 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
               {festData.category}
@@ -184,6 +161,7 @@ export default function FestDetailPage() {
               <Download className="w-4 h-4" />
               Download Brochure
             </button>
+          </div>
           </div>
         </div>
       </section>

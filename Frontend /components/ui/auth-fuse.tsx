@@ -230,15 +230,17 @@ function SignInForm() {
   );
 }
 
-function SignUpForm() {
+function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSuccess(false);
 
     const formData = new FormData(event.currentTarget);
     const name = formData.get("name") as string;
@@ -246,10 +248,11 @@ function SignUpForm() {
     const password = formData.get("password") as string;
 
     try {
-      const response = await signUp({ name, email, password });
-      setAuthToken(response.access_token);
-      router.push("/");
-      router.refresh();
+      await signUp({ name, email, password });
+      setSuccess(true);
+      setTimeout(() => {
+        onSuccess?.();
+      }, 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign up failed");
     } finally {
@@ -268,12 +271,17 @@ function SignUpForm() {
           {error}
         </div>
       )}
+      {success && (
+        <div className="text-sm text-green-600 text-center bg-green-50 dark:bg-green-900/20 p-3 rounded">
+          Account created successfully! Redirecting to sign in...
+        </div>
+      )}
       <div className="grid gap-4">
         <div className="grid gap-1"><Label htmlFor="name">Full Name</Label><Input id="name" name="name" type="text" placeholder="John Doe" required autoComplete="name" /></div>
         <div className="grid gap-2"><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" placeholder="m@example.com" required autoComplete="email" /></div>
         <PasswordInput name="password" label="Password" required autoComplete="new-password" placeholder="Password"/>
-        <Button type="submit" variant="outline" className="mt-2" disabled={isLoading}>
-          {isLoading ? "Signing up..." : "Sign Up"}
+        <Button type="submit" variant="outline" className="mt-2" disabled={isLoading || success}>
+          {isLoading ? "Signing up..." : success ? "Success!" : "Sign Up"}
         </Button>
       </div>
     </form>
@@ -283,7 +291,7 @@ function SignUpForm() {
 function AuthFormContainer({ isSignIn, onToggle }: { isSignIn: boolean; onToggle: () => void; }) {
     return (
         <div className="mx-auto grid w-[350px] gap-2">
-            {isSignIn ? <SignInForm /> : <SignUpForm />}
+            {isSignIn ? <SignInForm /> : <SignUpForm onSuccess={onToggle} />}
             <div className="text-center text-sm">
                 {isSignIn ? "Don't have an account?" : "Already have an account?"}{" "}
                 <Button variant="link" className="pl-1 text-foreground" onClick={onToggle}>
