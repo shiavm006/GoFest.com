@@ -5,9 +5,22 @@ import { CartoonButton } from "@/components/ui/cartoon-button";
 import { ProfileButton } from "@/components/ui/profile-button";
 import { BadgeHelp, Instagram, Twitter, Heart } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { getAuthToken } from "@/lib/api";
 import React from "react";
 
 export function HeroSection03() {
+  const router = useRouter();
+
+  const handleHostClick = () => {
+    const token = getAuthToken();
+    if (!token) {
+      router.push("/");
+    } else {
+      router.push("/host");
+    }
+  };
+
   return (
     <div className="min-h-screen relative">
       <div className="w-full absolute h-full z-0 bg-[radial-gradient(circle,_black_1px,_transparent_1px)] dark:bg-[radial-gradient(circle,_white_1px,_transparent_1px)] opacity-15 [background-size:20px_20px]"/>
@@ -29,7 +42,7 @@ export function HeroSection03() {
               </Link>
             </nav>
             <div className="flex items-center gap-2 scale-75">
-              <CartoonButton label="HOST+" color="bg-white" onClick={() => {}} />
+              <CartoonButton label="HOST+" color="bg-white" onClick={handleHostClick} />
             </div>
             <ProfileButton />
           </div>

@@ -9,6 +9,7 @@ import { ProfileButton } from "@/components/ui/profile-button";
 import { FestCard } from "@/components/ui/cards";
 import Pagination from "@/components/ui/pagination";
 import { ArrowUpRight } from "lucide-react";
+import { getAuthToken } from "@/lib/api";
 
 const generateSlug = (title: string) => {
   return title
@@ -168,6 +169,15 @@ export default function EventsPage() {
     router.push(`/events/${slug}`);
   };
 
+  const handleHostClick = () => {
+    const token = getAuthToken();
+    if (!token) {
+      router.push("/");
+    } else {
+      router.push("/host");
+    }
+  };
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
@@ -205,7 +215,7 @@ export default function EventsPage() {
             </Link>
           </nav>
           <div className="flex items-center gap-2 scale-75">
-            <CartoonButton label="HOST+" color="bg-white" onClick={() => {}} />
+            <CartoonButton label="HOST+" color="bg-white" onClick={handleHostClick} />
           </div>
           <ProfileButton />
         </div>

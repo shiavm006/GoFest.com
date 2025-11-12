@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { allFests } from "../page";
 import { CartoonButton } from "@/components/ui/cartoon-button";
 import { ProfileButton } from "@/components/ui/profile-button";
 import { ArrowLeft, MapPin, Calendar, Clock, Users, Mail, Phone, Instagram, Linkedin, ExternalLink, Download } from "lucide-react";
+import { getAuthToken } from "@/lib/api";
 
 const generateSlug = (title: string) => {
   return title
@@ -16,9 +17,19 @@ const generateSlug = (title: string) => {
 
 export default function FestDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const slug = params.slug as string;
 
   const fest = allFests.find((f) => generateSlug(f.title) === slug);
+
+  const handleHostClick = () => {
+    const token = getAuthToken();
+    if (!token) {
+      router.push("/");
+    } else {
+      router.push("/host");
+    }
+  };
 
   if (!fest) {
     return (
@@ -89,7 +100,7 @@ export default function FestDetailPage() {
             </Link>
           </nav>
           <div className="flex items-center gap-2 scale-75">
-            <CartoonButton label="HOST+" color="bg-white" onClick={() => {}} />
+            <CartoonButton label="HOST+" color="bg-white" onClick={handleHostClick} />
           </div>
           <ProfileButton />
         </div>
