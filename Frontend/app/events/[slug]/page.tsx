@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { allFests } from "../page";
+import { useState, useEffect } from "react";
 import { CartoonButton } from "@/components/ui/cartoon-button";
 import { ProfileButton } from "@/components/ui/profile-button";
-import { ArrowLeft, MapPin, Calendar, Clock, Users, Mail, Phone, Instagram, Linkedin, ExternalLink, Download } from "lucide-react";
-import { getAuthToken } from "@/lib/api";
+import { ArrowLeft, MapPin, Calendar, Clock, Users, Mail, Phone, Instagram, Linkedin, ExternalLink, Download, Loader2 } from "lucide-react";
+import { getAuthToken, fetchFestBySlug, registerForFest, type Fest } from "@/lib/api";
+import { fallbackFests } from "../page";
 
 const generateSlug = (title: string) => {
   return title
@@ -20,26 +21,101 @@ export default function FestDetailPage() {
   const router = useRouter();
   const slug = params.slug as string;
 
-  const fest = allFests.find((f) => generateSlug(f.title) === slug);
+  const [fest, setFest] = useState<Fest | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
-  const handleHostClick = () => {
+  useEffect(() => {
+    async function loadFest() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await fetchFestBySlug(slug);
+        setFest(data);
+      } catch (err: any) {
+        console.error("Failed to load fest:", err);
+        setError(err.message);
+        
+        // Try fallback data
+        const fallbackFest = fallbackFests.find((f) => generateSlug(f.title) === slug);
+        if (fallbackFest) {
+          // Convert fallback to Fest type with mock data
+          setFest({
+            _id: "fallback",
+            slug: slug,
+            title: fallbackFest.title,
+            category: fallbackFest.category,
+            description: fallbackFest.description,
+            image: fallbackFest.image,
+            college: "Sample College",
+            date: "TBD",
+            location: {
+              city: "Sample City",
+              state: "Sample State"
+            },
+            organizer: {
+              name: fallbackFest.author || "Event Organizer",
+              role: fallbackFest.role || "Organizer",
+              college: "Sample College"
+            },
+            entryType: "Free",
+            events: [],
+            hostedBy: {
+              _id: "fallback",
+              name: fallbackFest.author || "Event Organizer",
+              email: "contact@sample.com"
+            },
+            registrationsCount: 0,
+            status: "published",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          } as Fest);
+          setError(null);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadFest();
+  }, [slug]);
+
+  const handleRegisterClick = async () => {
     const token = getAuthToken();
     if (!token) {
       router.push("/login");
-    } else {
-      router.push("/host");
+      return;
+    }
+
+    if (!fest || fest._id === "fallback") {
+      alert("This is a sample fest. Create your own fest to enable registration!");
+      return;
+    }
+
+    try {
+      setIsRegistering(true);
+      await registerForFest(fest._id);
+      setRegistrationSuccess(true);
+      alert(`Successfully registered for ${fest.title}! 🎉`);
+    } catch (err: any) {
+      alert(err.message || "Registration failed. You may already be registered.");
+    } finally {
+      setIsRegistering(false);
     }
   };
 
-  const handleRegisterClick = () => {
-    const token = getAuthToken();
-    if (!token) {
-      router.push("/login");
-    } else {
-      // TODO: Implement registration modal or API call
-      alert("Registration feature coming soon! You are logged in.");
+  if (isLoading) {
+    return (
+      <div className="min-h-screen relative text-white flex items-center justify-center">
+        <div className="w-full absolute h-full z-0 bg-[radial-gradient(circle,_rgba(255,255,255,0.12)_1px,_transparent_1px)] opacity-20 [background-size:20px_20px]" />
+        <div className="relative z-10">
+          <Loader2 className="w-12 h-12 animate-spin text-white/60" />
+        </div>
+      </div>
+    );
     }
-  };
 
   if (!fest) {
     return (
@@ -58,36 +134,6 @@ export default function FestDetailPage() {
     );
   }
 
-  const festData = {
-    ...fest,
-    tagline: "Where innovation meets celebration",
-    college: "IIT Delhi",
-    date: "March 15-17, 2025",
-    duration: "3 days",
-    location: "IIT Delhi Campus, New Delhi",
-    city: "New Delhi",
-    state: "Delhi",
-    entryType: "Free",
-    expectedFootfall: "5000+ students",
-    website: "https://techfusion.iitd.ac.in",
-    email: "contact@techfusion.iitd.ac.in",
-    phone: "+91 98765 43210",
-    instagram: "@techfusion_iitd",
-    linkedin: "techfusion-iitd",
-    lat: 28.5450,
-    lon: 77.1925,
-    detailedDescription: `${fest.description} This fest brings together students from across the country to celebrate innovation, creativity, and collaboration. Join us for an unforgettable experience filled with competitions, workshops, performances, and networking opportunities.`,
-    goals: "To foster innovation, creativity, and collaboration among students while providing a platform for showcasing talent and building lasting connections.",
-    participants: "Open to all college students, college clubs, teams, and individual participants",
-    events: [
-      { name: "Hackathon", date: "March 15", time: "9:00 AM", venue: "Main Hall", category: "Technical", prize: "₹50,000", limit: "50 teams" },
-      { name: "Dance Competition", date: "March 15", time: "6:00 PM", venue: "Auditorium", category: "Cultural", prize: "₹25,000", limit: "20 teams" },
-      { name: "Debate", date: "March 16", time: "10:00 AM", venue: "Seminar Hall", category: "Academic", prize: "₹15,000", limit: "30 participants" },
-      { name: "Robotics Workshop", date: "March 16", time: "2:00 PM", venue: "Lab 3", category: "Workshop", prize: "N/A", limit: "40 participants" },
-      { name: "Music Night", date: "March 17", time: "7:00 PM", venue: "Open Ground", category: "Cultural", prize: "N/A", limit: "Open" },
-    ],
-  };
-
   return (
     <div className="min-h-screen relative text-white">
       <div className="w-full absolute h-full z-0 bg-[radial-gradient(circle,_rgba(255,255,255,0.12)_1px,_transparent_1px)] opacity-20 [background-size:20px_20px]" />
@@ -97,242 +143,261 @@ export default function FestDetailPage() {
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url(${festData.image})`,
+            backgroundImage: `url(${fest.image})`,
           }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" />
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black"></div>
+        </div>
         
-        <div className="relative z-10 h-full flex flex-col px-6 md:px-12 lg:px-16 pt-8">
+        <div className="absolute top-6 left-6 z-10">
           <Link
             href="/events"
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors mb-auto"
+            className="flex items-center gap-2 text-white/80 hover:text-white transition-colors bg-black/30 backdrop-blur-sm px-4 py-2 rounded-lg"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm">Back to Events</span>
+            Back to Events
           </Link>
-
-          <div className="pb-16">
-          <div className="mb-6">
-            <span className="inline-block px-3 py-1 text-xs font-medium text-white/90 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
-              {festData.category}
-            </span>
           </div>
 
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-light text-white mb-4 leading-[1.1] tracking-tight">
-            {festData.title}
+        <div className="relative z-10 flex flex-col justify-end h-full px-6 lg:px-16 pb-12">
+          <div className="max-w-4xl">
+            <div className="inline-block px-3 py-1 mb-4 text-xs font-semibold bg-white/20 backdrop-blur-sm rounded-full text-white">
+              {fest.category}
+            </div>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white">
+              {fest.title}
           </h1>
-          
-          <p className="text-xl text-white/90 mb-8 max-w-2xl">
-            {festData.tagline}
+            <p className="text-xl text-white/90 mb-6">
+              {fest.tagline || fest.description}
           </p>
-
-          <div className="flex flex-wrap items-center gap-6 text-sm text-white/80 mb-8">
+            <div className="flex flex-wrap gap-4 text-sm">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
-              <span>{festData.date}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              <span>{festData.duration}</span>
+                <span>{fest.date}</span>
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
-              <span>{festData.city}, {festData.state}</span>
+                <span>{fest.location.city}, {fest.location.state}</span>
             </div>
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4" />
-              <span>{festData.expectedFootfall}</span>
+                <span>{fest.registrationsCount} Registered</span>
+              </div>
             </div>
           </div>
-
-          <div className="flex items-center gap-4 mb-8">
-            <div className="text-sm text-white/80">
-              Organized by <span className="font-medium text-white">{festData.college}</span>
-              <span className="ml-2 text-xs bg-white/20 px-2 py-0.5 rounded">Verified</span>
             </div>
-          </div>
+      </section>
 
-          <div className="flex flex-wrap items-center gap-4">
-            <button 
-              onClick={handleRegisterClick}
-              className="bg-white text-black px-8 py-3 text-sm font-medium transition-opacity hover:opacity-90 cursor-pointer"
-            >
-              Register Now
-            </button>
-            {festData.website && (
-              <a
-                href={festData.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="border border-white/30 text-white px-6 py-3 text-sm font-medium transition-colors hover:bg-white/10 flex items-center gap-2"
-              >
-                <ExternalLink className="w-4 h-4" />
-                Official Fest Website
-              </a>
+      {/* 2. Quick Info Bar */}
+      <section className="sticky top-0 z-40 bg-black/80 backdrop-blur-md border-b border-white/10">
+        <div className="px-6 lg:px-16 py-4 flex flex-wrap justify-between items-center gap-4">
+          <div>
+            <h2 className="text-xl font-semibold">{fest.title}</h2>
+            <p className="text-sm text-white/60">{fest.college}</p>
+          </div>
+          <button 
+            onClick={handleRegisterClick}
+            disabled={isRegistering || registrationSuccess}
+            className="px-6 py-2 bg-white text-black rounded-lg font-semibold hover:bg-white/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {isRegistering ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Registering...
+              </>
+            ) : registrationSuccess ? (
+              "✓ Registered"
+            ) : (
+              "Register Now"
             )}
-            <button className="border border-white/30 text-white px-6 py-3 text-sm font-medium transition-colors hover:bg-white/10 flex items-center gap-2">
-              <Download className="w-4 h-4" />
-              Download Brochure
-            </button>
-          </div>
-          </div>
+          </button>
         </div>
       </section>
 
-      <main className="px-6 md:px-12 lg:px-16 py-16 relative z-10">
-        {/* 2. About Section */}
-        <section className="mb-20">
-          <h2 className="text-3xl font-light text-white mb-8">About</h2>
-          <p className="text-lg text-white/70 leading-relaxed mb-8 max-w-3xl">
-            {festData.detailedDescription}
+      {/* 3. Main Content */}
+      <main className="px-6 lg:px-16 py-12 relative z-10">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-12">
+          {/* Left Column - Main Info */}
+          <div className="lg:col-span-2 space-y-12">
+            {/* About */}
+            <section>
+              <h3 className="text-2xl font-bold mb-4">About {fest.title}</h3>
+              <p className="text-white/80 leading-relaxed">
+                {fest.description}
           </p>
-          
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
+            </section>
+
+            {/* Events Schedule */}
+            {fest.events && fest.events.length > 0 && (
+              <section>
+                <h3 className="text-2xl font-bold mb-6">Events & Activities</h3>
+                <div className="space-y-4">
+                  {fest.events.map((event, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 hover:bg-white/10 transition-all"
+                    >
+                      <div className="flex justify-between items-start mb-3">
             <div>
-              <p className="text-xs text-white/50 mb-2">Goals</p>
-              <p className="text-base text-white/90 leading-relaxed">{festData.goals}</p>
+                          <h4 className="text-lg font-semibold">{event.name}</h4>
+                          <span className="text-xs px-2 py-1 bg-white/10 rounded-full inline-block mt-2">
+                            {event.category}
+                          </span>
+                        </div>
+                        {event.prize && (
+                          <div className="text-right">
+                            <div className="text-sm text-white/60">Prize</div>
+                            <div className="font-semibold">{event.prize}</div>
+                          </div>
+                        )}
             </div>
-            <div>
-              <p className="text-xs text-white/50 mb-2">Who can participate</p>
-              <p className="text-base text-white/90 leading-relaxed">{festData.participants}</p>
+                      <div className="flex flex-wrap gap-4 text-sm text-white/70">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          {event.date}
             </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4" />
+                          {event.time}
+          </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4" />
+                          {event.venue}
+            </div>
+                        {event.limit && (
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4" />
+                            {event.limit}
+            </div>
+                        )}
+          </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-6 pt-8 border-t border-white/10">
-            <div>
-              <p className="text-xs text-white/50 mb-1">Entry Type</p>
-              <p className="text-base text-white font-medium">{festData.entryType}</p>
-            </div>
-            <div>
-              <p className="text-xs text-white/50 mb-1">Expected Footfall</p>
-              <p className="text-base text-white font-medium">{festData.expectedFootfall}</p>
-            </div>
-          </div>
-        </section>
-
-        {/* 3. Schedule / Events Section */}
-        <section className="mb-20">
-          <h2 className="text-3xl font-light text-white mb-8">Schedule</h2>
-          <div className="space-y-4">
-            {festData.events.map((event, index) => (
-              <div key={index} className="border border-white/10 bg-white/5 backdrop-blur-sm p-6 hover:border-white/20 transition-colors rounded-lg">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-medium text-white">{event.name}</h3>
-                      <span className="text-xs text-white/60 bg-white/10 px-2 py-1 rounded">{event.category}</span>
+          {/* Right Column - Sidebar */}
+          <div className="space-y-8">
+            {/* Event Details Card */}
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
+              <h4 className="text-lg font-semibold mb-4">Event Details</h4>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <div className="text-white/60 mb-1">Entry</div>
+                  <div className="font-semibold">{fest.entryType}</div>
+                </div>
+                {fest.duration && (
+                  <div>
+                    <div className="text-white/60 mb-1">Duration</div>
+                    <div className="font-semibold">{fest.duration}</div>
                     </div>
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-white/60">
-                      <span>{event.date}</span>
-                      <span>•</span>
-                      <span>{event.time}</span>
-                      <span>•</span>
-                      <span>{event.venue}</span>
-                      {event.prize !== "N/A" && (
-                        <>
-                          <span>•</span>
-                          <span className="font-medium text-white">Prize: {event.prize}</span>
-                        </>
-                      )}
-                      <span>•</span>
-                      <span>Limit: {event.limit}</span>
-                    </div>
+                )}
+                {fest.expectedFootfall && (
+                  <div>
+                    <div className="text-white/60 mb-1">Expected Footfall</div>
+                    <div className="font-semibold">{fest.expectedFootfall}</div>
                   </div>
-                  <button className="text-sm text-white border border-white/20 px-4 py-2 hover:bg-white/10 transition-colors">
-                    View Details
-                  </button>
+                )}
+                <div>
+                  <div className="text-white/60 mb-1">Registrations</div>
+                  <div className="font-semibold">{fest.registrationsCount} people</div>
                 </div>
               </div>
-            ))}
-          </div>
-        </section>
-
-        {/* 4. Organizers / Contacts Section */}
-        <section className="mb-20">
-          <h2 className="text-3xl font-light text-white mb-8">Organizers</h2>
-          <div className="border border-white/10 bg-white/5 backdrop-blur-sm p-8 rounded-lg">
-            <div className="mb-6">
-              <p className="text-lg font-medium text-white mb-1">{festData.author}</p>
-              <p className="text-sm text-white/60">{festData.role}</p>
-              <p className="text-sm text-white/60 mt-1">{festData.college}</p>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-6 mb-6">
-              {festData.email && (
-                <a href={`mailto:${festData.email}`} className="flex items-center gap-3 text-white/70 hover:text-white transition-colors">
+            {/* Organizer Card */}
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
+              <h4 className="text-lg font-semibold mb-4">Contact Organizer</h4>
+              <div className="space-y-3 text-sm">
+                <div>
+                  <div className="font-semibold">{fest.organizer.name}</div>
+                  <div className="text-white/60">{fest.organizer.role}</div>
+                  <div className="text-white/60">{fest.organizer.college}</div>
+                </div>
+                {fest.organizer.email && (
+                  <a
+                    href={`mailto:${fest.organizer.email}`}
+                    className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+                  >
                   <Mail className="w-4 h-4" />
-                  <span className="text-sm">{festData.email}</span>
+                    {fest.organizer.email}
                 </a>
               )}
-              {festData.phone && (
-                <a href={`tel:${festData.phone}`} className="flex items-center gap-3 text-white/70 hover:text-white transition-colors">
+                {fest.organizer.phone && (
+                  <a
+                    href={`tel:${fest.organizer.phone}`}
+                    className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+                  >
                   <Phone className="w-4 h-4" />
-                  <span className="text-sm">{festData.phone}</span>
+                    {fest.organizer.phone}
                 </a>
               )}
-              {festData.instagram && (
+                {fest.organizer.instagram && (
                 <a
-                  href={`https://instagram.com/${festData.instagram.replace('@', '')}`}
+                    href={`https://instagram.com/${fest.organizer.instagram.replace('@', '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-white/70 hover:text-white transition-colors"
+                    className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
                 >
                   <Instagram className="w-4 h-4" />
-                  <span className="text-sm">{festData.instagram}</span>
+                    {fest.organizer.instagram}
                 </a>
               )}
-              {festData.linkedin && (
+                {fest.organizer.linkedin && (
                 <a
-                  href={`https://linkedin.com/company/${festData.linkedin}`}
+                    href={`https://linkedin.com/in/${fest.organizer.linkedin}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-white/70 hover:text-white transition-colors"
+                    className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
                 >
                   <Linkedin className="w-4 h-4" />
-                  <span className="text-sm">LinkedIn</span>
+                    LinkedIn Profile
                 </a>
               )}
             </div>
-
-            <button className="border border-white/20 text-white px-6 py-2 text-sm font-medium hover:bg-white/10 transition-colors">
-              Message Organizer
-            </button>
-          </div>
-        </section>
-
-        {/* 5. Map / Location Section */}
-        <section className="mb-20">
-          <h2 className="text-3xl font-light text-white mb-8">Location</h2>
-          <div className="border border-white/10 overflow-hidden rounded-lg">
-            <div className="w-full h-[400px] bg-gray-900 relative">
-              <iframe
-                title="Fest location map"
-                width="100%"
-                height="100%"
-                className="border-0"
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="no-referrer-when-downgrade"
-                src={`https://www.google.com/maps?q=${festData.lat},${festData.lon}&hl=en&z=14&output=embed`}
-              />
             </div>
-            <div className="p-6 bg-white/5 backdrop-blur-sm">
-              <p className="text-base text-white mb-4">{festData.location}</p>
+
+            {/* Resources */}
+            {(fest.website || fest.brochure) && (
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
+                <h4 className="text-lg font-semibold mb-4">Resources</h4>
+                <div className="space-y-3">
+                  {fest.website && (
               <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${festData.lat},${festData.lon}`}
+                      href={fest.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-all group"
+                    >
+                      <div className="flex items-center gap-2">
+                        <ExternalLink className="w-4 h-4" />
+                        <span className="text-sm font-medium">Official Website</span>
+                      </div>
+                      <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </a>
+                  )}
+                  {fest.brochure && (
+                    <a
+                      href={fest.brochure}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors text-sm"
-              >
-                <MapPin className="w-4 h-4" />
-                Get Directions
-              </a>
+                      className="flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-all group"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Download className="w-4 h-4" />
+                        <span className="text-sm font-medium">Download Brochure</span>
+                      </div>
+                      <Download className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </a>
+                  )}
+                </div>
             </div>
+            )}
           </div>
-        </section>
-
+        </div>
       </main>
     </div>
   );
 }
-

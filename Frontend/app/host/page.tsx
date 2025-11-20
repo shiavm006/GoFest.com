@@ -7,8 +7,8 @@ import { CartoonButton } from "@/components/ui/cartoon-button"
 import { ProfileButton } from "@/components/ui/profile-button"
 import { Input } from "@/components/ui/input"
 import { FileUpload } from "@/components/ui/file-upload"
-import { getAuthToken } from "@/lib/api"
-import { Calendar, MapPin, Users, Plus, Trash2, Building2, Mail, Phone, Image, IndianRupee, Navigation, Link as LinkIcon, FileText } from "lucide-react"
+import { getAuthToken, createFest } from "@/lib/api"
+import { Calendar, MapPin, Users, Plus, Trash2, Building2, Mail, Phone, Image, IndianRupee, Navigation, Link as LinkIcon, FileText, Clock, Trophy } from "lucide-react"
 
 export default function HostFestPage() {
   const router = useRouter()
@@ -22,48 +22,55 @@ export default function HostFestPage() {
     setIsLoggedIn(!!token);
   }, []);
 
+  // Match backend schema exactly
   const [festData, setFestData] = useState({
-    name: "",
+    title: "",
     slug: "",
     description: "",
-    category: "CULTURAL",
-    startDate: "",
-    endDate: "",
-    registrationDeadline: "",
+    tagline: "",
+    category: "Culture",
+    image: "",
+    college: "",
+    date: "",
+    duration: "",
     location: {
-      venue: "",
       city: "",
       state: "",
-      country: "India"
+      address: ""
     },
     organizer: {
       name: "",
+      role: "",
       college: "",
-      contactEmail: "",
-      contactPhone: ""
+      email: "",
+      phone: "",
+      instagram: "",
+      linkedin: ""
     },
-    coverImage: "",
+    entryType: "Free",
+    entryFee: 0,
+    expectedFootfall: "",
     website: "",
     brochure: "",
-    entryFee: 0,
-    isPaid: false,
     events: [] as Array<{
       name: string;
-      description: string;
       date: string;
+      time: string;
       venue: string;
-      college: string;
-      maxParticipants: number;
+      category: string;
+      prize: string;
+      limit: string;
     }>
   })
 
   const [currentEvent, setCurrentEvent] = useState({
     name: "",
-    description: "",
     date: "",
+    time: "",
     venue: "",
-    college: "",
-    maxParticipants: 0
+    category: "Technical",
+    prize: "",
+    limit: ""
   })
 
   useEffect(() => {
@@ -73,19 +80,25 @@ export default function HostFestPage() {
     }
   }, [router])
 
-  const generateSlug = (name: string) => {
-    return name
+  const generateSlug = (title: string) => {
+    return title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")
   }
 
   const handleInputChange = (field: string, value: any) => {
-    if (field === "name") {
+    if (field === "title") {
       setFestData({
         ...festData,
-        name: value,
+        title: value,
         slug: generateSlug(value)
+      })
+    } else if (field === "entryType") {
+      setFestData({
+        ...festData,
+        entryType: value,
+        entryFee: value === "Free" ? 0 : festData.entryFee
       })
     } else {
       setFestData({ ...festData, [field]: value })
@@ -103,19 +116,23 @@ export default function HostFestPage() {
   }
 
   const addEvent = () => {
-    if (currentEvent.name && currentEvent.date) {
+    if (currentEvent.name && currentEvent.date && currentEvent.time && currentEvent.venue && currentEvent.category) {
       setFestData({
         ...festData,
         events: [...festData.events, currentEvent]
       })
       setCurrentEvent({
         name: "",
-        description: "",
         date: "",
+        time: "",
         venue: "",
-        college: "",
-        maxParticipants: 0
+        category: "Technical",
+        prize: "",
+        limit: ""
       })
+    } else {
+      setError("Please fill all required event fields (Name, Date, Time, Venue, Category)")
+      setTimeout(() => setError(""), 3000)
     }
   }
 
@@ -163,8 +180,7 @@ export default function HostFestPage() {
             location: {
               ...festData.location,
               city: data.location.city,
-              state: data.location.state,
-              country: data.location.country
+              state: data.location.state
             }
           })
         } catch (err: any) {
@@ -196,24 +212,28 @@ export default function HostFestPage() {
 
     try {
       const token = getAuthToken()
-      const response = await fetch("http://localhost:8000/api/fests", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(festData)
-      })
-
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.detail || "Failed to create fest")
+      if (!token) {
+        throw new Error("Please login to create a fest")
       }
 
-      const fest = await response.json()
+      // Validate required fields
+      if (!festData.title) throw new Error("Fest title is required")
+      if (!festData.image) throw new Error("Cover image is required")
+      if (!festData.college) throw new Error("College name is required")
+      if (!festData.date) throw new Error("Fest date is required")
+      if (!festData.description) throw new Error("Description is required")
+      if (!festData.location.city) throw new Error("City is required")
+      if (!festData.location.state) throw new Error("State is required")
+      if (!festData.organizer.name) throw new Error("Organizer name is required")
+      if (!festData.organizer.role) throw new Error("Organizer role is required")
+      if (!festData.organizer.college) throw new Error("Organizer college is required")
+
+      // Submit directly - no transformation needed!
+      const fest = await createFest(festData)
       router.push(`/events/${fest.slug}`)
     } catch (err: any) {
       setError(err.message)
+      console.error("Fest creation error:", err)
     } finally {
       setIsLoading(false)
     }
@@ -265,6 +285,7 @@ export default function HostFestPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-12">
+            {/* Basic Information */}
             <section className="space-y-4">
               <div className="flex items-center gap-3 mb-6">
                 <Calendar className="w-6 h-6 text-white" />
@@ -273,10 +294,10 @@ export default function HostFestPage() {
               
               <div className="space-y-4">
                 <Input
-                  label="Fest Name"
+                  label="Fest Title *"
                   placeholder="e.g., Spring Festival 2025"
-                  value={festData.name}
-                  onChange={(value) => handleInputChange("name", value)}
+                  value={festData.title}
+                  onChange={(value) => handleInputChange("title", value)}
                   required
                   size="large"
                 />
@@ -288,9 +309,20 @@ export default function HostFestPage() {
                   size="large"
                 />
 
+                <Input
+                  label="College / Institution Name *"
+                  placeholder="e.g., IIT Delhi"
+                  value={festData.college}
+                  onChange={(value) => handleInputChange("college", value)}
+                  required
+                  size="large"
+                  prefix={<Building2 className="w-4 h-4" />}
+                  prefixStyling={false}
+                />
+
                 <div>
                   <label className="block capitalize text-[13px] text-gray-900 dark:text-gray-300 mb-2">
-                    Category
+                    Category *
                   </label>
                   <select
                     required
@@ -299,19 +331,27 @@ export default function HostFestPage() {
                     className="w-full h-12 text-base rounded-lg border border-gray-alpha-400 hover:border-gray-alpha-500 focus:border-transparent focus:shadow-focus-input bg-background-100 text-geist-foreground px-3 outline-none duration-150"
                     aria-label="Fest Category"
                   >
-                    <option value="CULTURAL">Cultural</option>
-                    <option value="TECHNICAL">Technical</option>
-                    <option value="SPORTS">Sports</option>
-                    <option value="LITERARY">Literary</option>
-                    <option value="BUSINESS">Business</option>
-                    <option value="MUSIC">Music</option>
-                    <option value="OTHER">Other</option>
+                    <option value="Culture">Culture</option>
+                    <option value="Technology">Technology</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Music">Music</option>
+                    <option value="Arts">Arts</option>
+                    <option value="Business">Business</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
 
+                <Input
+                  label="Tagline (optional)"
+                  placeholder="A catchy tagline for your fest"
+                  value={festData.tagline}
+                  onChange={(value) => handleInputChange("tagline", value)}
+                  size="large"
+                />
+
                 <div>
                   <label className="block capitalize text-[13px] text-gray-900 dark:text-gray-300 mb-2">
-                    Description
+                    Description *
                   </label>
                   <textarea
                     required
@@ -322,35 +362,37 @@ export default function HostFestPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
-                    label="Start Date"
-                    type="date"
-                    value={festData.startDate}
-                    onChange={(value) => handleInputChange("startDate", value)}
+                    label="Date *"
+                    placeholder="e.g., March 15-17, 2025"
+                    value={festData.date}
+                    onChange={(value) => handleInputChange("date", value)}
                     required
                     size="large"
                   />
                   <Input
-                    label="End Date"
-                    type="date"
-                    value={festData.endDate}
-                    onChange={(value) => handleInputChange("endDate", value)}
-                    required
-                    size="large"
-                  />
-                  <Input
-                    label="Registration Deadline"
-                    type="date"
-                    value={festData.registrationDeadline}
-                    onChange={(value) => handleInputChange("registrationDeadline", value)}
-                    required
+                    label="Duration (optional)"
+                    placeholder="e.g., 3 days"
+                    value={festData.duration}
+                    onChange={(value) => handleInputChange("duration", value)}
                     size="large"
                   />
                 </div>
+
+                <Input
+                  label="Expected Footfall (optional)"
+                  placeholder="e.g., 5000+ students"
+                  value={festData.expectedFootfall}
+                  onChange={(value) => handleInputChange("expectedFootfall", value)}
+                  size="large"
+                  prefix={<Users className="w-4 h-4" />}
+                  prefixStyling={false}
+                />
               </div>
             </section>
 
+            {/* Location */}
             <section className="space-y-4">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -370,11 +412,10 @@ export default function HostFestPage() {
               
               <div className="space-y-4">
                 <Input
-                  label="Venue"
+                  label="Venue / Address (optional)"
                   placeholder="College Campus / Hall Name"
-                  value={festData.location.venue}
-                  onChange={(value) => handleNestedChange("location", "venue", value)}
-                  required
+                  value={festData.location.address}
+                  onChange={(value) => handleNestedChange("location", "address", value)}
                   size="large"
                   prefix={<Building2 className="w-4 h-4" />}
                   prefixStyling={false}
@@ -382,7 +423,7 @@ export default function HostFestPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
-                    label="City"
+                    label="City *"
                     placeholder="e.g., Mumbai"
                     value={festData.location.city}
                     onChange={(value) => handleNestedChange("location", "city", value)}
@@ -390,7 +431,7 @@ export default function HostFestPage() {
                     size="large"
                   />
                   <Input
-                    label="State"
+                    label="State *"
                     placeholder="e.g., Maharashtra"
                     value={festData.location.state}
                     onChange={(value) => handleNestedChange("location", "state", value)}
@@ -401,6 +442,7 @@ export default function HostFestPage() {
               </div>
             </section>
 
+            {/* Organizer Details */}
             <section className="space-y-4">
               <div className="flex items-center gap-3 mb-6">
                 <Users className="w-6 h-6 text-white" />
@@ -409,7 +451,7 @@ export default function HostFestPage() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  label="Organizer Name"
+                  label="Organizer Name *"
                   placeholder="Full name"
                   value={festData.organizer.name}
                   onChange={(value) => handleNestedChange("organizer", "name", value)}
@@ -417,38 +459,59 @@ export default function HostFestPage() {
                   size="large"
                 />
                 <Input
-                  label="College"
-                  placeholder="College name"
+                  label="Role / Position *"
+                  placeholder="e.g., Cultural Secretary"
+                  value={festData.organizer.role}
+                  onChange={(value) => handleNestedChange("organizer", "role", value)}
+                  required
+                  size="large"
+                />
+                <Input
+                  label="College / Institution *"
+                  placeholder="Organizer's college"
                   value={festData.organizer.college}
                   onChange={(value) => handleNestedChange("organizer", "college", value)}
                   required
                   size="large"
                 />
                 <Input
-                  label="Contact Email"
+                  label="Email (optional)"
                   type="email"
                   placeholder="email@example.com"
-                  value={festData.organizer.contactEmail}
-                  onChange={(value) => handleNestedChange("organizer", "contactEmail", value)}
-                  required
+                  value={festData.organizer.email}
+                  onChange={(value) => handleNestedChange("organizer", "email", value)}
                   size="large"
                   prefix={<Mail className="w-4 h-4" />}
                   prefixStyling={false}
                 />
                 <Input
-                  label="Contact Phone"
+                  label="Phone (optional)"
                   type="tel"
                   placeholder="+91 1234567890"
-                  value={festData.organizer.contactPhone}
-                  onChange={(value) => handleNestedChange("organizer", "contactPhone", value)}
-                  required
+                  value={festData.organizer.phone}
+                  onChange={(value) => handleNestedChange("organizer", "phone", value)}
                   size="large"
                   prefix={<Phone className="w-4 h-4" />}
                   prefixStyling={false}
                 />
+                <Input
+                  label="Instagram (optional)"
+                  placeholder="@username"
+                  value={festData.organizer.instagram}
+                  onChange={(value) => handleNestedChange("organizer", "instagram", value)}
+                  size="large"
+                />
+                <Input
+                  label="LinkedIn (optional)"
+                  placeholder="username"
+                  value={festData.organizer.linkedin}
+                  onChange={(value) => handleNestedChange("organizer", "linkedin", value)}
+                  size="large"
+                />
               </div>
             </section>
 
+            {/* Images & Media */}
             <section className="space-y-4">
               <div className="flex items-center gap-3 mb-6">
                 <Image className="w-6 h-6 text-white" />
@@ -465,8 +528,8 @@ export default function HostFestPage() {
                     fileType="image"
                     label="Upload Cover Image"
                     description="Click to select or drag and drop (JPG, PNG, GIF)"
-                    onUpload={(url) => handleInputChange("coverImage", url)}
-                    value={festData.coverImage}
+                    onUpload={(url) => handleInputChange("image", url)}
+                    value={festData.image}
                   />
                 </div>
 
@@ -497,48 +560,47 @@ export default function HostFestPage() {
               </div>
             </section>
 
+            {/* Pricing */}
             <section className="space-y-4">
               <div className="flex items-center gap-3 mb-6">
                 <IndianRupee className="w-6 h-6 text-white" />
-                <h2 className="text-2xl font-bold text-white">Pricing</h2>
+                <h2 className="text-2xl font-bold text-white">Entry & Pricing</h2>
               </div>
               
               <div className="space-y-4">
-                <div className="flex items-center gap-4 p-6 border border-gray-alpha-400 rounded-lg bg-background-100 hover:bg-gray-100 transition-colors">
-                  <input
-                    type="checkbox"
-                    id="isPaid"
-                    checked={festData.isPaid}
-                    onChange={(e) => handleInputChange("isPaid", e.target.checked)}
-                    className="w-5 h-5 rounded cursor-pointer accent-blue-500"
-                  />
-                  <div className="flex-1">
-                    <label htmlFor="isPaid" className="text-base font-semibold cursor-pointer block text-gray-900 dark:text-gray-300">
-                      This is a paid fest
+                <div>
+                  <label className="block capitalize text-[13px] text-gray-900 dark:text-gray-300 mb-2">
+                    Entry Type *
                     </label>
-                    <p className="text-sm text-gray-700 mt-1">
-                      Enable if attendees need to pay an entry fee
-                    </p>
-                  </div>
+                  <select
+                    required
+                    value={festData.entryType}
+                    onChange={(e) => handleInputChange("entryType", e.target.value)}
+                    className="w-full h-12 text-base rounded-lg border border-gray-alpha-400 hover:border-gray-alpha-500 focus:border-transparent focus:shadow-focus-input bg-background-100 text-geist-foreground px-3 outline-none duration-150"
+                    aria-label="Entry Type"
+                  >
+                    <option value="Free">Free</option>
+                    <option value="Paid">Paid</option>
+                  </select>
                 </div>
 
-                {festData.isPaid && (
-                  <div className="pl-4 border-l-4 border-blue-500">
+                {festData.entryType === "Paid" && (
                     <Input
-                      label="Entry Fee (₹)"
+                    label="Entry Fee (₹) *"
                       type="number"
                       placeholder="500"
                       value={festData.entryFee.toString()}
                       onChange={(value) => handleInputChange("entryFee", parseInt(value) || 0)}
+                    required
                       size="large"
                       prefix={<IndianRupee className="w-4 h-4" />}
                       prefixStyling={false}
                     />
-                  </div>
                 )}
               </div>
             </section>
 
+            {/* Events */}
             <section className="space-y-4">
               <div className="flex items-center gap-3 mb-6">
                 <Plus className="w-6 h-6 text-white" />
@@ -554,62 +616,82 @@ export default function HostFestPage() {
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-300">Add Event</h3>
-                        <p className="text-sm text-gray-700">Fill in the details below to add an event to your fest</p>
+                        <p className="text-sm text-gray-700">All fields marked with * are required</p>
                       </div>
                     </div>
 
                     <Input
-                      label="Event Name"
+                      label="Event Name *"
                       placeholder="e.g., Dance Competition"
                       value={currentEvent.name}
                       onChange={(value) => setCurrentEvent({ ...currentEvent, name: value })}
                       size="large"
                     />
-                    
-                    <div>
-                      <label className="block capitalize text-[13px] text-gray-900 dark:text-gray-300 mb-2">
-                        Event Description
-                      </label>
-                      <textarea
-                        value={currentEvent.description}
-                        onChange={(e) => setCurrentEvent({ ...currentEvent, description: e.target.value })}
-                        className="w-full h-24 text-base rounded-lg border border-gray-alpha-400 hover:border-gray-alpha-500 focus:border-transparent focus:shadow-focus-input bg-background-100 text-geist-foreground px-3 py-3 outline-none duration-150 resize-none"
-                        placeholder="Describe the event..."
-                      />
-                    </div>
-
-                    <Input
-                      label="College / University Name"
-                      placeholder="e.g., IIT Delhi"
-                      value={currentEvent.college}
-                      onChange={(value) => setCurrentEvent({ ...currentEvent, college: value })}
-                      size="large"
-                      prefix={<Building2 className="w-4 h-4" />}
-                      prefixStyling={false}
-                    />
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Input
-                        label="Date"
-                        type="date"
+                        label="Date *"
+                        placeholder="e.g., March 15, 2025"
                         value={currentEvent.date}
                         onChange={(value) => setCurrentEvent({ ...currentEvent, date: value })}
                         size="large"
                       />
                       <Input
-                        label="Venue"
-                        placeholder="Event venue"
+                        label="Time *"
+                        placeholder="e.g., 10:00 AM"
+                        value={currentEvent.time}
+                        onChange={(value) => setCurrentEvent({ ...currentEvent, time: value })}
+                        size="large"
+                        prefix={<Clock className="w-4 h-4" />}
+                        prefixStyling={false}
+                      />
+                      <Input
+                        label="Venue *"
+                        placeholder="Hall / Ground"
                         value={currentEvent.venue}
                         onChange={(value) => setCurrentEvent({ ...currentEvent, venue: value })}
                         size="large"
                       />
+                    </div>
+
+                    <div>
+                      <label className="block capitalize text-[13px] text-gray-900 dark:text-gray-300 mb-2">
+                        Category *
+                      </label>
+                      <select
+                        value={currentEvent.category}
+                        onChange={(e) => setCurrentEvent({ ...currentEvent, category: e.target.value })}
+                        className="w-full h-12 text-base rounded-lg border border-gray-alpha-400 hover:border-gray-alpha-500 focus:border-transparent focus:shadow-focus-input bg-background-100 text-geist-foreground px-3 outline-none duration-150"
+                        aria-label="Event Category"
+                      >
+                        <option value="Technical">Technical</option>
+                        <option value="Cultural">Cultural</option>
+                        <option value="Sports">Sports</option>
+                        <option value="Academic">Academic</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Competition">Competition</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Input
-                        label="Max Participants"
-                        type="number"
-                        placeholder="Unlimited"
-                        value={currentEvent.maxParticipants.toString()}
-                        onChange={(value) => setCurrentEvent({ ...currentEvent, maxParticipants: parseInt(value) || 0 })}
+                        label="Prize (optional)"
+                        placeholder="e.g., ₹50,000"
+                        value={currentEvent.prize}
+                        onChange={(value) => setCurrentEvent({ ...currentEvent, prize: value })}
                         size="large"
+                        prefix={<Trophy className="w-4 h-4" />}
+                        prefixStyling={false}
+                      />
+                      <Input
+                        label="Participant Limit (optional)"
+                        placeholder="e.g., 50 teams"
+                        value={currentEvent.limit}
+                        onChange={(value) => setCurrentEvent({ ...currentEvent, limit: value })}
+                        size="large"
+                        prefix={<Users className="w-4 h-4" />}
+                        prefixStyling={false}
                       />
                     </div>
 
@@ -645,32 +727,34 @@ export default function HostFestPage() {
                                 </div>
                                 <div className="flex-1">
                                   <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-300">{event.name}</h4>
-                                  {event.college && (
-                                    <p className="text-sm text-blue-600 dark:text-blue-400 mt-1 font-medium flex items-center gap-1.5">
-                                      <Building2 className="w-3.5 h-3.5" />
-                                      {event.college}
-                                    </p>
-                                  )}
-                                  {event.description && (
-                                    <p className="text-sm text-gray-700 mt-2 leading-relaxed">{event.description}</p>
-                                  )}
+                                  <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full inline-block mt-2">
+                                    {event.category}
+                                  </span>
                                   <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-gray-700">
-                                    {event.date && (
-                                      <div className="flex items-center gap-1.5">
-                                        <Calendar className="w-3.5 h-3.5" />
-                                        <span>{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                      </div>
-                                    )}
-                                    {event.venue && (
-                                      <div className="flex items-center gap-1.5">
-                                        <MapPin className="w-3.5 h-3.5" />
-                                        <span>{event.venue}</span>
-                                      </div>
-                                    )}
                                     <div className="flex items-center gap-1.5">
-                                      <Users className="w-3.5 h-3.5" />
-                                      <span>Max: {event.maxParticipants || "Unlimited"}</span>
+                                      <Calendar className="w-3.5 h-3.5" />
+                                      <span>{event.date}</span>
                                     </div>
+                                    <div className="flex items-center gap-1.5">
+                                      <Clock className="w-3.5 h-3.5" />
+                                      <span>{event.time}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                      <MapPin className="w-3.5 h-3.5" />
+                                      <span>{event.venue}</span>
+                                    </div>
+                                    {event.prize && (
+                                      <div className="flex items-center gap-1.5">
+                                        <Trophy className="w-3.5 h-3.5" />
+                                        <span>{event.prize}</span>
+                                      </div>
+                                    )}
+                                    {event.limit && (
+                                      <div className="flex items-center gap-1.5">
+                                        <Users className="w-3.5 h-3.5" />
+                                        <span>{event.limit}</span>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                               </div>

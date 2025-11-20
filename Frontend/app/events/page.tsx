@@ -2,23 +2,16 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import SuggestiveSearch from "@/components/ui/suggestive-search";
 import { CartoonButton } from "@/components/ui/cartoon-button";
 import { ProfileButton } from "@/components/ui/profile-button";
-import { FestCard } from "@/components/ui/cards";
 import Pagination from "@/components/ui/pagination";
-import { ArrowUpRight } from "lucide-react";
-import { getAuthToken } from "@/lib/api";
+import { ArrowUpRight, Loader2 } from "lucide-react";
+import { getAuthToken, fetchFests, type Fest } from "@/lib/api";
 
-const generateSlug = (title: string) => {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-};
-
-export const allFests: FestCard[] = [
+// Fallback fests for when backend is empty or unreachable (also exported for detail page)
+export const fallbackFests = [
   {
     title: "TechFusion 2025",
     category: "Technology",
@@ -132,46 +125,66 @@ export default function EventsPage() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [fests, setFests] = useState<Fest[]>([]);
+  const [totalFests, setTotalFests] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [useFallback, setUseFallback] = useState(false);
 
   useEffect(() => {
     const token = getAuthToken();
     setIsLoggedIn(!!token);
   }, []);
 
-  const filteredFests = useMemo(() => {
-    const normalized = searchTerm.trim().toLowerCase();
+  useEffect(() => {
+    async function loadFests() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const data = await fetchFests({
+          skip: (currentPage - 1) * ITEMS_PER_PAGE,
+          limit: ITEMS_PER_PAGE,
+          search: searchTerm || undefined,
+        });
 
-    if (!normalized) return allFests;
+        if (data.fests.length === 0 && currentPage === 1 && !searchTerm) {
+          setUseFallback(true);
+        } else {
+          setFests(data.fests);
+          setTotalFests(data.total);
+          setUseFallback(false);
+        }
+      } catch (err: any) {
+        console.error("Failed to load fests:", err);
+        setError(err.message);
+        setUseFallback(true);
+      } finally {
+        setIsLoading(false);
+      }
+    }
 
-    return allFests.filter((fest) => {
-      const haystack = [
-        fest.title,
-        fest.category,
-        fest.description,
-        fest.author,
-        fest.role,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+    loadFests();
+  }, [currentPage, searchTerm]);
 
-      return haystack.includes(normalized);
-    });
+  useEffect(() => {
+    setCurrentPage(1);
   }, [searchTerm]);
 
-  const totalPages = Math.ceil(filteredFests.length / ITEMS_PER_PAGE);
-  const paginatedFests = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredFests.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredFests, currentPage]);
+  const totalPages = useFallback 
+    ? Math.ceil(fallbackFests.length / ITEMS_PER_PAGE)
+    : Math.ceil(totalFests / ITEMS_PER_PAGE);
+
+  const displayFests = useFallback 
+    ? fallbackFests.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+    : fests;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleExplore = (title: string) => {
-    const slug = generateSlug(title);
+  const handleExplore = (slug: string) => {
     router.push(`/events/${slug}`);
   };
 
@@ -183,10 +196,6 @@ export default function EventsPage() {
       router.push("/host");
     }
   };
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
 
   return (
     <div className="min-h-screen relative text-white">
@@ -235,16 +244,43 @@ export default function EventsPage() {
             Featured events on gofest
           </h2>
           <p className="text-sm text-white/60 mt-2 max-w-2xl text-left">
-            Explore stories from campuses using gofest to power their fests.
+            {useFallback 
+              ? "Explore example fests. Create your own to see it here!"
+              : "Explore stories from campuses using gofest to power their fests."}
           </p>
         </div>
 
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="w-12 h-12 animate-spin text-white/60" />
+          </div>
+        ) : displayFests.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-xl text-white/60 mb-4">
+              {searchTerm ? "No fests found matching your search" : "No fests available yet"}
+            </p>
+            {!searchTerm && (
+              <button
+                onClick={handleHostClick}
+                className="text-white/80 hover:text-white underline"
+              >
+                Be the first to host a fest!
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {paginatedFests.map((event) => (
+              {displayFests.map((event: any) => {
+                const festSlug = useFallback 
+                  ? event.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
+                  : event.slug;
+                
+                return (
             <div
-              key={event.title}
+                    key={useFallback ? event.title : event._id}
               className="group flex flex-col justify-between cursor-pointer"
-              onClick={() => handleExplore(event.title)}
+                    onClick={() => handleExplore(festSlug)}
             >
               <div>
                 <div className="flex aspect-[3/2] overflow-clip rounded-xl mb-4">
@@ -270,10 +306,11 @@ export default function EventsPage() {
                 </div>
               )}
 
-              {event.author && (
+                    {(event.author || event.hostedBy) && (
                 <div className="mb-4 text-[11px] text-white/45 uppercase tracking-[0.2em]">
-                  {event.author}
-                  {event.role ? ` — ${event.role}` : ""}
+                        {useFallback ? event.author : event.hostedBy?.name}
+                        {event.role && ` — ${event.role}`}
+                        {event.college && !useFallback && ` — ${event.college}`}
                 </div>
               )}
 
@@ -282,7 +319,8 @@ export default function EventsPage() {
                 <ArrowUpRight className="ml-2 size-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
               </div>
             </div>
-          ))}
+                );
+              })}
         </div>
         
         {totalPages > 1 && (
@@ -293,6 +331,8 @@ export default function EventsPage() {
               onPageChange={handlePageChange}
             />
           </div>
+            )}
+          </>
         )}
       </main>
     </div>
