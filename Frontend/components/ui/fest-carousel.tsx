@@ -66,7 +66,7 @@ const FestCarousel = ({
             {heading}
           </h2>
           {description && (
-            <p className={`text-sm md:text-base text-white/60 ${descriptionClassName || ""}`}>
+            <p className={`text-sm md:text-base text-gray-500 ${descriptionClassName || ""}`}>
               {description}
             </p>
           )}
@@ -80,7 +80,7 @@ const FestCarousel = ({
               carouselApi?.scrollPrev();
             }}
             disabled={!canScrollPrev}
-            className="disabled:pointer-events-auto border-white/10 bg-white/5 text-white hover:bg-white/10"
+            className="disabled:pointer-events-auto border-gray-200 bg-gray-50 text-white hover:bg-white/10"
           >
             <ArrowLeft className="size-5" />
           </Button>
@@ -91,7 +91,7 @@ const FestCarousel = ({
               carouselApi?.scrollNext();
             }}
             disabled={!canScrollNext}
-            className="disabled:pointer-events-auto border-white/10 bg-white/5 text-white hover:bg-white/10"
+            className="disabled:pointer-events-auto border-gray-200 bg-gray-50 text-white hover:bg-white/10"
           >
             <ArrowRight className="size-5" />
           </Button>
@@ -136,7 +136,7 @@ const FestCarousel = ({
                   </div>
 
                   {event.description && (
-                    <div className="mb-4 line-clamp-2 text-sm text-white/60 md:mb-6 md:text-base lg:mb-6">
+                    <div className="mb-4 line-clamp-2 text-sm text-gray-500 md:mb-6 md:text-base lg:mb-6">
                       {event.description}
                     </div>
                   )}
@@ -148,7 +148,7 @@ const FestCarousel = ({
                     </div>
                   )}
 
-                  <div className="flex items-center text-sm text-white/70 group-hover:text-white transition-colors">
+                  <div className="flex items-center text-sm text-gray-600 group-hover:text-white transition-colors">
                     Explore{" "}
                     <ArrowUpRight className="ml-2 size-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
                   </div>

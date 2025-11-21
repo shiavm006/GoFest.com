@@ -7,13 +7,13 @@ import { useRouter } from "next/navigation";
 import { ProfileDialog } from "@/components/ui/profile-dialog";
 
 export function ProfileButton() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return !!localStorage.getItem("auth_token");
+  });
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
-    setIsLoggedIn(!!token);
-    
     // Listen for storage changes (when user logs in/out in another tab)
     const handleStorageChange = () => {
       const newToken = localStorage.getItem('auth_token');

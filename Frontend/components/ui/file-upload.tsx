@@ -112,11 +112,11 @@ export function FileUpload({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           className={cn(
-            "flex h-48 cursor-pointer flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-gray-alpha-400 bg-background-100 transition-colors hover:bg-gray-100",
+            "flex h-48 cursor-pointer flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-gray-300 bg-white transition-colors hover:bg-gray-50",
             isDragging && "border-blue-500/50 bg-blue-50",
           )}
         >
-          <div className="rounded-full bg-background p-3 shadow-sm">
+          <div className="rounded-full bg-white p-3 shadow-sm">
             {fileType === "image" ? (
               <ImagePlus className="h-6 w-6 text-gray-700" />
             ) : (
@@ -133,7 +133,7 @@ export function FileUpload({
       ) : (
         <div className="relative">
           {fileType === "image" ? (
-            <div className="group relative h-48 overflow-hidden rounded-lg border border-gray-alpha-400">
+            <div className="group relative h-48 overflow-hidden rounded-lg border border-gray-200 bg-white">
               <Image
                 src={displayUrl}
                 alt="Preview"
@@ -164,7 +164,7 @@ export function FileUpload({
               </div>
             </div>
           ) : (
-            <div className="group relative h-24 overflow-hidden rounded-lg border border-gray-alpha-400 bg-background-100 p-4">
+            <div className="group relative h-24 overflow-hidden rounded-lg border border-gray-200 bg-white p-4">
               <div className="flex items-center gap-3">
                 <FileText className="h-8 w-8 text-gray-700" />
                 <div className="flex-1">

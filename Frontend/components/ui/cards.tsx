@@ -65,14 +65,14 @@ export function FeaturedFestCards({
 
       <header className="flex flex-col gap-2">
         <h2 className={cn("text-3xl font-semibold text-white", headingClassName)}>{heading}</h2>
-        <p className={cn("text-sm text-white/60 max-w-xl", descriptionClassName)}>{description}</p>
+        <p className={cn("text-sm text-gray-500 max-w-xl", descriptionClassName)}>{description}</p>
       </header>
 
       <div className="mt-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
         {events.map((event) => (
           <article
             key={event.title}
-            className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-lg transition duration-300 hover:border-white/25 hover:shadow-[0_20px_40px_-24px_rgba(15,23,42,0.45)]"
+            className="flex flex-col gap-4 rounded-3xl border border-gray-200 bg-gray-50 p-5 backdrop-blur-lg transition duration-300 hover:border-white/25 hover:shadow-[0_20px_40px_-24px_rgba(15,23,42,0.45)]"
           >
             <div className="overflow-hidden rounded-2xl">
               <img
@@ -93,7 +93,7 @@ export function FeaturedFestCards({
               </h3>
 
               {event.description && (
-                <p className="text-xs text-white/60 leading-relaxed">
+                <p className="text-xs text-gray-500 leading-relaxed">
                   {event.description}
                 </p>
               )}

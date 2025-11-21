@@ -7,16 +7,11 @@ import { BadgeHelp, Instagram, Twitter, Heart } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAuthToken } from "@/lib/api";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export function HeroSection03() {
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const token = getAuthToken();
-    setIsLoggedIn(!!token);
-  }, []);
+  const [isLoggedIn] = useState<boolean>(() => !!getAuthToken());
 
   const handleHostClick = () => {
     const token = getAuthToken();

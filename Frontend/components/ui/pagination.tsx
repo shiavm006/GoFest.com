@@ -99,7 +99,7 @@ export default function Pagination({
         </svg>
       </button>
 
-      <div className="flex gap-2 text-white/60 text-sm md:text-base">
+      <div className="flex gap-2 text-gray-500 text-sm md:text-base">
         {pageNumbers.map((page, index) => {
           if (page === "ellipsis") {
             return (
@@ -124,7 +124,7 @@ export default function Pagination({
                 "flex items-center justify-center active:scale-95 w-9 md:w-12 h-9 md:h-12 aspect-square rounded-md transition-all",
                 isActive
                   ? "bg-white text-black border border-white"
-                  : "bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:border-white/20"
+                  : "bg-gray-50 border border-gray-200 text-gray-600 hover:bg-white/10 hover:border-white/20"
               )}
             >
               {pageNum}

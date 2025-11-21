@@ -1,26 +1,51 @@
-"use client"
+ "use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { CartoonButton } from "@/components/ui/cartoon-button"
-import { ProfileButton } from "@/components/ui/profile-button"
-import { Input } from "@/components/ui/input"
-import { FileUpload } from "@/components/ui/file-upload"
-import { getAuthToken, createFest } from "@/lib/api"
-import { Calendar, MapPin, Users, Plus, Trash2, Building2, Mail, Phone, Image, IndianRupee, Navigation, Link as LinkIcon, FileText, Clock, Trophy } from "lucide-react"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ProfileButton } from "@/components/ui/profile-button";
+import { Input } from "@/components/ui/input";
+import { FileUpload } from "@/components/ui/file-upload";
+import {
+  Calendar,
+  MapPin,
+  Users,
+  Plus,
+  Trash2,
+  Building2,
+  Mail,
+  Phone,
+  Image,
+  IndianRupee,
+  Navigation,
+  Link as LinkIcon,
+  Clock,
+  Trophy,
+} from "lucide-react";
+import { createFest, deleteFest, getAuthToken, getMyHostedFests, updateFest, type Fest } from "@/lib/api";
 
 export default function HostFestPage() {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const [isLoadingLocation, setIsLoadingLocation] = useState(false)
-  const [error, setError] = useState("")
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const router = useRouter();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const [view, setView] = useState<"list" | "form">("list");
+  const [myFests, setMyFests] = useState<Fest[]>([]);
+  const [isLoadingMyFests, setIsLoadingMyFests] = useState(true);
+  const [myFestsError, setMyFestsError] = useState("");
+  const [deletingFestId, setDeletingFestId] = useState<string | null>(null);
+  const [editingFestId, setEditingFestId] = useState<string | null>(null);
 
   useEffect(() => {
     const token = getAuthToken();
     setIsLoggedIn(!!token);
-  }, []);
+    if (!token) {
+      router.push("/");
+    }
+  }, [router]);
 
   // Match backend schema exactly
   const [festData, setFestData] = useState({
@@ -36,7 +61,7 @@ export default function HostFestPage() {
     location: {
       city: "",
       state: "",
-      address: ""
+      address: "",
     },
     organizer: {
       name: "",
@@ -45,7 +70,7 @@ export default function HostFestPage() {
       email: "",
       phone: "",
       instagram: "",
-      linkedin: ""
+      linkedin: "",
     },
     entryType: "Free",
     entryFee: 0,
@@ -60,8 +85,8 @@ export default function HostFestPage() {
       category: string;
       prize: string;
       limit: string;
-    }>
-  })
+    }>,
+  });
 
   const [currentEvent, setCurrentEvent] = useState({
     name: "",
@@ -70,57 +95,67 @@ export default function HostFestPage() {
     venue: "",
     category: "Technical",
     prize: "",
-    limit: ""
-  })
+    limit: "",
+  });
 
+  // Load fests hosted by the current user
   useEffect(() => {
-    const token = getAuthToken()
-    if (!token) {
-      router.push("/")
-    }
-  }, [router])
+    const token = getAuthToken();
+    if (!token) return;
 
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "")
-  }
+    async function loadMyFests() {
+      try {
+        setIsLoadingMyFests(true);
+        setMyFestsError("");
+        const data = await getMyHostedFests();
+        setMyFests(data);
+      } catch (err: any) {
+        setMyFestsError(err.message || "Failed to load your hosted fests");
+      } finally {
+        setIsLoadingMyFests(false);
+      }
+    }
+
+    loadMyFests();
+  }, []);
+
+  const generateSlug = (title: string) =>
+    title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
   const handleInputChange = (field: string, value: any) => {
-    if (field === "title") {
-      setFestData({
-        ...festData,
+    if (field === "title" && !editingFestId) {
+      setFestData((prev) => ({
+        ...prev,
         title: value,
-        slug: generateSlug(value)
-      })
+        slug: generateSlug(value),
+      }));
     } else if (field === "entryType") {
-      setFestData({
-        ...festData,
+      setFestData((prev) => ({
+        ...prev,
         entryType: value,
-        entryFee: value === "Free" ? 0 : festData.entryFee
-      })
+        entryFee: value === "Free" ? 0 : prev.entryFee,
+      }));
     } else {
-      setFestData({ ...festData, [field]: value })
+      setFestData((prev) => ({ ...prev, [field]: value }));
     }
-  }
+  };
 
-  const handleNestedChange = (parent: string, field: string, value: any) => {
-    setFestData({
-      ...festData,
+  const handleNestedChange = (parent: "location" | "organizer", field: string, value: any) => {
+    setFestData((prev) => ({
+      ...prev,
       [parent]: {
-        ...(festData[parent as keyof typeof festData] as any),
-        [field]: value
-      }
-    })
-  }
+        ...(prev[parent] as any),
+        [field]: value,
+      },
+    }));
+  };
 
   const addEvent = () => {
     if (currentEvent.name && currentEvent.date && currentEvent.time && currentEvent.venue && currentEvent.category) {
-      setFestData({
-        ...festData,
-        events: [...festData.events, currentEvent]
-      })
+      setFestData((prev) => ({
+        ...prev,
+        events: [...prev.events, currentEvent],
+      }));
       setCurrentEvent({
         name: "",
         date: "",
@@ -128,155 +163,333 @@ export default function HostFestPage() {
         venue: "",
         category: "Technical",
         prize: "",
-        limit: ""
-      })
+        limit: "",
+      });
     } else {
-      setError("Please fill all required event fields (Name, Date, Time, Venue, Category)")
-      setTimeout(() => setError(""), 3000)
+      setError("Please fill all required event fields (Name, Date, Time, Venue, Category)");
+      setTimeout(() => setError(""), 3000);
     }
-  }
+  };
 
   const removeEvent = (index: number) => {
-    setFestData({
-      ...festData,
-      events: festData.events.filter((_, i) => i !== index)
-    })
-  }
+    setFestData((prev) => ({
+      ...prev,
+      events: prev.events.filter((_, i) => i !== index),
+    }));
+  };
 
   const getCurrentLocation = async () => {
-    setIsLoadingLocation(true)
-    setError("")
+    setIsLoadingLocation(true);
+    setError("");
 
     if (!navigator.geolocation) {
-      setError("Geolocation is not supported by your browser")
-      setIsLoadingLocation(false)
-      return
+      setError("Geolocation is not supported by your browser");
+      setIsLoadingLocation(false);
+      return;
     }
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
-          const { latitude, longitude } = position.coords
-          const token = getAuthToken()
+          const { latitude, longitude } = position.coords;
+          const token = getAuthToken();
           
           const response = await fetch(
             `http://localhost:8000/api/location/reverse-geocode?lat=${latitude}&lon=${longitude}`,
             {
               headers: {
-                'Authorization': `Bearer ${token}`
-              }
-            }
-          )
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          );
 
           if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.detail || "Failed to fetch location")
+            const error = await response.json();
+            throw new Error(error.detail || "Failed to fetch location");
           }
 
-          const data = await response.json()
+          const data = await response.json();
 
-          setFestData({
-            ...festData,
+          setFestData((prev) => ({
+            ...prev,
             location: {
-              ...festData.location,
+              ...prev.location,
               city: data.location.city,
-              state: data.location.state
-            }
-          })
+              state: data.location.state,
+            },
+          }));
         } catch (err: any) {
-          setError(err.message || "Could not fetch location details. Please enter manually.")
+          setError(err.message || "Could not fetch location details. Please enter manually.");
         } finally {
-          setIsLoadingLocation(false)
+          setIsLoadingLocation(false);
         }
       },
       (error) => {
-        setIsLoadingLocation(false)
+        setIsLoadingLocation(false);
         if (error.code === error.PERMISSION_DENIED) {
-          setError("Location access denied. Please enable location permissions.")
+          setError("Location access denied. Please enable location permissions.");
         } else {
-          setError("Could not get your location. Please enter manually.")
+          setError("Could not get your location. Please enter manually.");
         }
       },
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 0
-      }
-    )
-  }
+        maximumAge: 0,
+      },
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     try {
-      const token = getAuthToken()
+      const token = getAuthToken();
       if (!token) {
-        throw new Error("Please login to create a fest")
+        throw new Error("Please login to create a fest");
       }
 
-      // Validate required fields
-      if (!festData.title) throw new Error("Fest title is required")
-      if (!festData.image) throw new Error("Cover image is required")
-      if (!festData.college) throw new Error("College name is required")
-      if (!festData.date) throw new Error("Fest date is required")
-      if (!festData.description) throw new Error("Description is required")
-      if (!festData.location.city) throw new Error("City is required")
-      if (!festData.location.state) throw new Error("State is required")
-      if (!festData.organizer.name) throw new Error("Organizer name is required")
-      if (!festData.organizer.role) throw new Error("Organizer role is required")
-      if (!festData.organizer.college) throw new Error("Organizer college is required")
+      if (!festData.title) throw new Error("Fest title is required");
+      if (!festData.image) throw new Error("Cover image is required");
+      if (!festData.college) throw new Error("College name is required");
+      if (!festData.date) throw new Error("Fest date is required");
+      if (!festData.description) throw new Error("Description is required");
+      if (!festData.location.city) throw new Error("City is required");
+      if (!festData.location.state) throw new Error("State is required");
+      if (!festData.organizer.name) throw new Error("Organizer name is required");
+      if (!festData.organizer.role) throw new Error("Organizer role is required");
+      if (!festData.organizer.college) throw new Error("Organizer college is required");
 
-      // Submit directly - no transformation needed!
-      const fest = await createFest(festData)
-      router.push(`/events/${fest.slug}`)
+      let fest: Fest;
+
+      if (editingFestId) {
+        fest = await updateFest(editingFestId, festData);
+      } else {
+        fest = await createFest(festData);
+      }
+
+      setEditingFestId(null);
+      setView("list");
+      router.push(`/events/${fest.slug}`);
     } catch (err: any) {
-      setError(err.message)
-      console.error("Fest creation error:", err)
+      setError(err.message);
+      console.error("Fest creation error:", err);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="w-full absolute h-full z-0 bg-[radial-gradient(circle,_rgba(255,255,255,0.12)_1px,_transparent_1px)] opacity-20 [background-size:20px_20px]"/>
-      
-      <header className="sticky top-0 z-50 bg-black/60 backdrop-blur supports-[backdrop-filter]:bg-black/40 flex justify-between items-center px-8 py-6 gap-6 text-white">
-        <Link href="/" className="text-2xl font-extrabold tracking-tight whitespace-nowrap">
+    <div className="min-h-screen bg-white text-black">
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 flex justify-between items-center px-8 py-3 gap-6">
+        <Link href="/" className="text-2xl font-extrabold tracking-tight whitespace-nowrap text-black">
           gofest.com
         </Link>
 
         <div className="flex items-center gap-2">
           <nav className="hidden md:flex gap-6 text-sm">
-            <Link href="/" className="text-white/70 hover:text-white transition-colors">
+            <Link href="/" className="text-black hover:text-gray-800 transition-colors">
               Home
             </Link>
-            <Link href="/events" className="text-white/70 hover:text-white transition-colors">
+            <Link href="/events" className="text-black hover:text-gray-800 transition-colors">
               Events
             </Link>
+            <Link href="/host" className="text-black hover:text-gray-800 transition-colors">
+              HOST
+            </Link>
             {!isLoggedIn && (
-              <Link href="/login" className="text-white/70 hover:text-white transition-colors">
+              <Link href="/login" className="text-black hover:text-gray-800 transition-colors">
                 Login
               </Link>
             )}
           </nav>
-          <div className="flex items-center gap-2 scale-75">
-            <CartoonButton label="HOST+" color="bg-white" onClick={() => router.push("/host")} />
-          </div>
           <ProfileButton />
         </div>
       </header>
 
       <main className="container mx-auto px-6 py-12 relative z-10">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-12">
-            <h1 className="text-5xl font-bold mb-4 text-white">Host Your Fest</h1>
-            <p className="text-white/70 text-lg">
-              Fill in the details below to list your college fest on our platform
-            </p>
+        {view === "list" ? (
+          <div className="max-w-5xl mx-auto">
+            <div className="mb-8 flex items-center justify-between gap-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2 text-black">Your Hosted Fests</h1>
+                <p className="text-gray-600 text-sm md:text-base">
+                  See all the fests you&apos;ve hosted on GoFest. You can open any fest to view its public page.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setView("form")}
+                className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-black hover:bg-white/90 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Host a new fest
+              </button>
+            </div>
+
+            {myFestsError && (
+              <div className="bg-red-500/10 border border-red-500/50 text-red-500 px-6 py-4 rounded-lg mb-8">
+                {myFestsError}
+              </div>
+            )}
+
+            {isLoadingMyFests ? (
+              <div className="flex justify-center items-center py-20 text-gray-500">
+                Loading your hosted fests...
+              </div>
+            ) : myFests.length === 0 ? (
+              <div className="py-16 text-center text-gray-500 space-y-4">
+                <p className="text-lg">You haven&apos;t hosted any fests yet.</p>
+                <button
+                  type="button"
+                  onClick={() => setView("form")}
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-black hover:bg-white/90 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Host your first fest
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {myFests.map((fest) => (
+                  <div
+                    key={fest._id}
+                    className="group relative rounded-xl border border-gray-200 bg-white p-5 hover:border-gray-300 transition-colors cursor-pointer shadow-sm"
+                    onClick={() => router.push(`/events/${fest.slug}`)}
+                  >
+                    <div className="absolute right-3 top-3 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingFestId(fest._id);
+                          setFestData({
+                            title: fest.title || "",
+                            slug: fest.slug || "",
+                            description: fest.description || "",
+                            tagline: fest.tagline || "",
+                            category: fest.category || "Culture",
+                            image: fest.image || "",
+                            college: fest.college || "",
+                            date: fest.date || "",
+                            duration: fest.duration || "",
+                            location: {
+                              city: fest.location?.city || "",
+                              state: fest.location?.state || "",
+                              address: fest.location?.address || "",
+                            },
+                            organizer: {
+                              name: fest.organizer?.name || "",
+                              role: fest.organizer?.role || "",
+                              college: fest.organizer?.college || "",
+                              email: fest.organizer?.email || "",
+                              phone: fest.organizer?.phone || "",
+                              instagram: fest.organizer?.instagram || "",
+                              linkedin: fest.organizer?.linkedin || "",
+                            },
+                            entryType: fest.entryType || "Free",
+                            entryFee: fest.entryFee ?? 0,
+                            expectedFootfall: fest.expectedFootfall || "",
+                            website: fest.website || "",
+                            brochure: fest.brochure || "",
+                            events: (fest.events || []).map((ev) => ({
+                              name: ev.name || "",
+                              date: ev.date || "",
+                              time: ev.time || "",
+                              venue: ev.venue || "",
+                              category: ev.category || "",
+                              prize: ev.prize || "",
+                              limit: ev.limit || "",
+                            })),
+                          });
+                          setView("form");
+                        }}
+                        className="rounded-full bg-white/90 hover:bg-white text-black px-3 py-1 text-[11px] font-semibold tracking-wide uppercase shadow-sm"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if (!window.confirm("Are you sure you want to delete this fest? This cannot be undone.")) {
+                            return;
+                          }
+                          try {
+                            setDeletingFestId(fest._id);
+                            await deleteFest(fest._id);
+                            setMyFests((prev) => prev.filter((f) => f._id !== fest._id));
+                          } catch (err: any) {
+                            alert(err.message || "Failed to delete fest");
+                          } finally {
+                            setDeletingFestId(null);
+                          }
+                        }}
+                        className="rounded-full bg-red-500/80 hover:bg-red-600 text-white px-3 py-1 text-[11px] font-semibold tracking-wide uppercase shadow-sm"
+                        disabled={deletingFestId === fest._id}
+                      >
+                        {deletingFestId === fest._id ? "Deleting..." : "Delete"}
+                      </button>
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2 text-black line-clamp-2">
+                      {fest.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                      {fest.tagline || fest.description}
+                    </p>
+                    <div className="flex flex-wrap gap-3 text-xs text-gray-600 mb-4">
+                      <span className="inline-flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {fest.date}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {fest.location?.city}, {fest.location?.state}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <Users className="w-3 h-3" />
+                        {fest.registrationsCount ?? 0} registrations
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-gray-600">
+                      <span className="uppercase tracking-[0.18em] text-gray-500">
+                        {fest.category}
+                      </span>
+                      <span className="text-gray-600">
+                        Hosted • {new Date(fest.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+        ) : (
+        <div className="max-w-4xl mx-auto">
+              <div className="mb-6 flex items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-5xl font-bold mb-2 text-black">
+                    {editingFestId ? "Edit Your Fest" : "Host Your Fest"}
+                  </h1>
+                  <p className="text-gray-600 text-lg">
+                    {editingFestId
+                      ? "Update the details of your college fest"
+                      : "Fill in the details below to list your college fest on our platform"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setView("list");
+                    setEditingFestId(null);
+                  }}
+                  className="text-sm text-gray-600 hover:text-black underline"
+                >
+                  ← Back to your hosted fests
+                </button>
+              </div>
 
           {error && (
             <div className="bg-red-500/10 border border-red-500/50 text-red-500 px-6 py-4 rounded-lg mb-8">
@@ -285,7 +498,7 @@ export default function HostFestPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-12">
-            {/* Basic Information */}
+              {/* Basic Information */}
             <section className="space-y-4">
               <div className="flex items-center gap-3 mb-6">
                 <Calendar className="w-6 h-6 text-white" />
@@ -303,13 +516,6 @@ export default function HostFestPage() {
                 />
 
                 <Input
-                  label="Slug (auto-generated)"
-                  value={festData.slug}
-                  disabled
-                  size="large"
-                />
-
-                <Input
                   label="College / Institution Name *"
                   placeholder="e.g., IIT Delhi"
                   value={festData.college}
@@ -321,14 +527,14 @@ export default function HostFestPage() {
                 />
 
                 <div>
-                  <label className="block capitalize text-[13px] text-gray-900 dark:text-gray-300 mb-2">
+                  <label className="block capitalize text-[13px] text-black mb-2">
                     Category *
                   </label>
                   <select
                     required
                     value={festData.category}
                     onChange={(e) => handleInputChange("category", e.target.value)}
-                    className="w-full h-12 text-base rounded-lg border border-gray-alpha-400 hover:border-gray-alpha-500 focus:border-transparent focus:shadow-focus-input bg-background-100 text-geist-foreground px-3 outline-none duration-150"
+                    className="w-full h-12 text-base rounded-lg border border-gray-300 hover:border-gray-400 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white text-black px-3 outline-none duration-150"
                     aria-label="Fest Category"
                   >
                     <option value="Culture">Culture</option>
@@ -350,14 +556,14 @@ export default function HostFestPage() {
                 />
 
                 <div>
-                  <label className="block capitalize text-[13px] text-gray-900 dark:text-gray-300 mb-2">
+                  <label className="block capitalize text-[13px] text-black mb-2">
                     Description *
                   </label>
                   <textarea
                     required
                     value={festData.description}
                     onChange={(e) => handleInputChange("description", e.target.value)}
-                    className="w-full h-32 text-base rounded-lg border border-gray-alpha-400 hover:border-gray-alpha-500 focus:border-transparent focus:shadow-focus-input bg-background-100 text-geist-foreground px-3 py-3 outline-none duration-150 resize-none"
+                    className="w-full h-32 text-base rounded-lg border border-gray-300 hover:border-gray-400 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white text-black px-3 py-3 outline-none duration-150 resize-none placeholder:text-gray-500/80"
                     placeholder="Describe your fest..."
                   />
                 </div>
@@ -569,14 +775,14 @@ export default function HostFestPage() {
               
               <div className="space-y-4">
                 <div>
-                  <label className="block capitalize text-[13px] text-gray-900 dark:text-gray-300 mb-2">
+                  <label className="block capitalize text-[13px] text-black mb-2">
                     Entry Type *
                     </label>
                   <select
                     required
                     value={festData.entryType}
                     onChange={(e) => handleInputChange("entryType", e.target.value)}
-                    className="w-full h-12 text-base rounded-lg border border-gray-alpha-400 hover:border-gray-alpha-500 focus:border-transparent focus:shadow-focus-input bg-background-100 text-geist-foreground px-3 outline-none duration-150"
+                    className="w-full h-12 text-base rounded-lg border border-gray-300 hover:border-gray-400 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white text-black px-3 outline-none duration-150"
                     aria-label="Entry Type"
                   >
                     <option value="Free">Free</option>
@@ -608,7 +814,7 @@ export default function HostFestPage() {
               </div>
               
               <div className="space-y-6">
-                <div className="p-8 border-2 border-dashed border-gray-alpha-400 rounded-lg bg-background-100">
+                <div className="p-8 border-2 border-dashed border-gray-300 rounded-lg bg-white">
                   <div className="space-y-5">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
@@ -655,13 +861,13 @@ export default function HostFestPage() {
                     </div>
 
                     <div>
-                      <label className="block capitalize text-[13px] text-gray-900 dark:text-gray-300 mb-2">
+                      <label className="block capitalize text-[13px] text-black mb-2">
                         Category *
                       </label>
                       <select
                         value={currentEvent.category}
                         onChange={(e) => setCurrentEvent({ ...currentEvent, category: e.target.value })}
-                        className="w-full h-12 text-base rounded-lg border border-gray-alpha-400 hover:border-gray-alpha-500 focus:border-transparent focus:shadow-focus-input bg-background-100 text-geist-foreground px-3 outline-none duration-150"
+                        className="w-full h-12 text-base rounded-lg border border-gray-300 hover:border-gray-400 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white text-black px-3 outline-none duration-150"
                         aria-label="Event Category"
                       >
                         <option value="Technical">Technical</option>
@@ -718,7 +924,7 @@ export default function HostFestPage() {
                     </div>
                     <div className="space-y-3">
                       {festData.events.map((event, index) => (
-                        <div key={index} className="group p-6 border border-gray-alpha-400 rounded-lg bg-background-100 hover:shadow-md transition-all">
+                        <div key={index} className="group p-6 border border-gray-200 rounded-lg bg-white hover:border-gray-300 transition-all">
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1">
                               <div className="flex items-start gap-3">
@@ -777,19 +983,33 @@ export default function HostFestPage() {
             </section>
 
             <div className="flex gap-4 justify-end pt-6 border-t border-white/10">
-              <CartoonButton
-                label="CANCEL"
-                color="bg-white"
-                onClick={() => router.back()}
-              />
-              <CartoonButton
-                label={isLoading ? "CREATING..." : "CREATE FEST"}
-                color="bg-red-500"
+              <button
+                type="button"
+                onClick={() => {
+                  setView("list");
+                  setEditingFestId(null);
+                }}
+                className="px-4 py-2 rounded-lg border border-white/30 text-sm font-medium text-white hover:bg-white/10 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
                 disabled={isLoading}
-              />
+                className="px-4 py-2 rounded-lg bg-red-500 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              >
+                {isLoading
+                  ? editingFestId
+                    ? "SAVING..."
+                    : "CREATING..."
+                  : editingFestId
+                    ? "SAVE CHANGES"
+                    : "CREATE FEST"}
+              </button>
             </div>
           </form>
         </div>
+        )}
       </main>
     </div>
   )

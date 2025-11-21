@@ -27,7 +27,8 @@ interface InputProps {
   ref?: React.RefObject<HTMLInputElement | null>;
   className?: string;
   wrapperClassName?: string;
-  [key: string]: any;
+  // Allow arbitrary HTML input props without using `any`
+  [key: string]: unknown;
 }
 
 export const Input = ({
@@ -50,7 +51,8 @@ export const Input = ({
   ...rest
 }: InputProps) => {
   const [_value, set_value] = useState(value || "");
-  const _ref = ref ? ref : useRef<HTMLInputElement>(null);
+  const internalRef = useRef<HTMLInputElement>(null);
+  const _ref = ref ?? internalRef;
 
   const _onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     set_value(e.target.value);
@@ -68,22 +70,24 @@ export const Input = ({
   return (
     <div className="flex flex-col gap-2" onClick={() => _ref.current?.focus()}>
       {label && (
-        <div className="capitalize text-[13px] text-gray-900">
+        <div className="capitalize text-[13px] text-black">
           {label}
         </div>
       )}
       <div className={clsx(
-        "flex items-center duration-150 font-sans",
-        error ? "shadow-error-input hover:shadow-error-input-hover" : "border border-gray-alpha-400 hover:border-gray-alpha-500 focus-within:border-transparent focus-within:shadow-focus-input",
+        "flex items-center duration-150 font-sans rounded-lg",
+        error
+          ? "border border-red-400"
+          : "border border-gray-300 hover:border-gray-400 focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600",
         sizes[size],
-        disabled ? "cursor-not-allowed bg-gray-100" : "bg-background-100",
+        disabled ? "cursor-not-allowed bg-gray-100" : "bg-white",
         wrapperClassName
       )}>
         {prefix && (
           <div
             className={clsx(
-              "text-gray-700 fill-gray-700 h-full flex items-center justify-center",
-              prefixStyling === true ? "bg-background-200 border-r border-gray-alpha-400 px-3" : `pl-3${!prefixStyling ? "" : ` ${prefixStyling}`}`,
+              "text-gray-500 fill-gray-500 h-full flex items-center justify-center",
+              prefixStyling === true ? "bg-white border-r border-gray-200 px-3" : `pl-3${!prefixStyling ? "" : ` ${prefixStyling}`}`,
               size === "large" ? "rounded-l-lg" : "rounded-l-md"
             )}>
             {prefix}
@@ -91,9 +95,9 @@ export const Input = ({
         )}
         <input
           className={clsx(
-            "w-full inline-flex appearance-none placeholder:text-gray-900 placeholder:opacity-70 outline-none",
+            "w-full inline-flex appearance-none placeholder:text-gray-500 placeholder:opacity-80 outline-none",
             (size === "xSmall" || size === "mediumSmall") ? "px-2" : "px-3",
-            disabled ? "cursor-not-allowed bg-gray-100 text-gray-700" : "bg-background-100 text-geist-foreground",
+            disabled ? "cursor-not-allowed bg-gray-100 text-gray-500" : "bg-white text-black",
             className
           )}
           placeholder={placeholder}
@@ -107,8 +111,8 @@ export const Input = ({
         />
         {suffix && (
           <div className={clsx(
-            "text-gray-700 fill-gray-700 h-full flex items-center justify-center",
-            suffixStyling === true ? "bg-background-200 border-l border-gray-alpha-400 px-3" : `pr-3 ${!suffixStyling ? "" : ` ${suffixStyling}`}`,
+            "text-gray-500 fill-gray-500 h-full flex items-center justify-center",
+            suffixStyling === true ? "bg-white border-l border-gray-200 px-3" : `pr-3 ${!suffixStyling ? "" : ` ${suffixStyling}`}`,
             size === "large" ? "rounded-r-lg" : "rounded-r-md"
           )}>
             {suffix}

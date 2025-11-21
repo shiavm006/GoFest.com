@@ -209,6 +209,30 @@ export async function createFest(data: any): Promise<Fest> {
   return response.json();
 }
 
+export async function updateFest(festId: string, data: any): Promise<Fest> {
+  const token = getAuthToken();
+
+  if (!token) {
+    throw new Error("Authentication required");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/fests/${festId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || "Failed to update fest");
+  }
+
+  return response.json();
+}
+
 export async function registerForFest(festId: string, registeredEvents?: string[]): Promise<Registration> {
   const token = getAuthToken();
   

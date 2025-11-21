@@ -55,7 +55,7 @@ export function useImageUpload({ onUpload }: UseImageUploadProps = {}) {
       const file = event.target.files?.[0];
       if (!file) return;
 
-      setFileName(file.name);
+        setFileName(file.name);
       setUploadError(null);
       setIsUploading(true);
 

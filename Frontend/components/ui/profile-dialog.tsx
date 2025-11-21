@@ -47,7 +47,7 @@ function ProfileBg({ defaultImage }: { defaultImage?: string }) {
         <div className="absolute inset-0 flex items-center justify-center gap-2">
           <button
             type="button"
-            className="z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white outline-offset-2 transition-colors hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70"
+            className="z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-gray-900/70 text-white outline-offset-2 transition-colors hover:bg-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70"
             onClick={handleThumbnailClick}
             aria-label={currentImage ? "Change image" : "Upload image"}
           >
@@ -56,7 +56,7 @@ function ProfileBg({ defaultImage }: { defaultImage?: string }) {
           {currentImage && (
             <button
               type="button"
-              className="z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white outline-offset-2 transition-colors hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70"
+              className="z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-gray-900/70 text-white outline-offset-2 transition-colors hover:bg-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70"
               onClick={handleImageRemove}
               aria-label="Remove image"
             >
@@ -96,7 +96,7 @@ function Avatar({ defaultImage }: { defaultImage?: string }) {
         )}
         <button
           type="button"
-          className="absolute flex size-8 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white outline-offset-2 transition-colors hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70"
+          className="absolute flex size-8 cursor-pointer items-center justify-center rounded-full bg-gray-900/70 text-white outline-offset-2 transition-colors hover:bg-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70"
           onClick={handleThumbnailClick}
           aria-label="Change profile picture"
         >
@@ -177,9 +177,9 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-lg [&>button:last-child]:top-3.5 bg-black border-white/10">
+      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-lg [&>button:last-child]:top-3.5 bg-white border-gray-200">
         <DialogHeader className="contents space-y-0 text-left">
-          <DialogTitle className="border-b border-white/10 px-6 py-4 text-base text-white">
+          <DialogTitle className="border-b border-gray-200 px-6 py-4 text-base text-black">
             Edit profile
           </DialogTitle>
         </DialogHeader>
@@ -187,59 +187,59 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
           Make changes to your profile here. You can change your photo and set a username.
         </DialogDescription>
         <div className="overflow-y-auto">
-          <div className="h-20 bg-gradient-to-br from-purple-600 to-blue-600"></div>
+          <div className="h-20 bg-gradient-to-br from-[#2D5BFF] to-[#4F46E5]"></div>
           <Avatar defaultImage="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop" />
           <div className="px-6 pb-6 pt-4">
             <form className="space-y-4">
               {isLoading ? (
-                <div className="text-white/60 text-center py-4">Loading profile...</div>
+                <div className="text-gray-500 text-center py-4">Loading profile...</div>
               ) : (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor={`${id}-full-name`} className="text-white">Full Name</Label>
+                    <Label htmlFor={`${id}-full-name`} className="text-black">Full Name</Label>
                     <Input
                       id={`${id}-full-name`}
                       placeholder="John Doe"
                       value={userData?.name || ''}
                       type="text"
                       disabled
-                      className="bg-white/5 border-white/10 text-white opacity-60 cursor-not-allowed"
+                      className="bg-gray-50 border-gray-200 text-black opacity-60 cursor-not-allowed"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor={`${id}-email`} className="text-white">Email</Label>
+                    <Label htmlFor={`${id}-email`} className="text-black">Email</Label>
                     <Input
                       id={`${id}-email`}
                       placeholder="john@example.com"
                       value={userData?.email || ''}
                       type="email"
                       disabled
-                      className="bg-white/5 border-white/10 text-white opacity-60 cursor-not-allowed"
+                      className="bg-gray-50 border-gray-200 text-black opacity-60 cursor-not-allowed"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor={`${id}-phone`} className="text-white">Phone Number</Label>
+                    <Label htmlFor={`${id}-phone`} className="text-black">Phone Number</Label>
                     <Input
                       id={`${id}-phone`}
                       placeholder="+91 98765 43210"
                       value={userData?.phone || ''}
                       type="tel"
                       disabled
-                      className="bg-white/5 border-white/10 text-white opacity-60 cursor-not-allowed"
+                      className="bg-gray-50 border-gray-200 text-black opacity-60 cursor-not-allowed"
                     />
                   </div>
               <div className="space-y-2">
-                <Label htmlFor={`${id}-organization`} className="text-white">College / Organization Name</Label>
+                <Label htmlFor={`${id}-organization`} className="text-black">College / Organization Name</Label>
                 <Input
                   id={`${id}-organization`}
                   placeholder="e.g., IIT Delhi, BITS Pilani"
                   value={userData?.college || ''}
                   type="text"
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-gray-50 border-gray-200 text-black"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor={`${id}-bio`} className="text-white">Biography</Label>
+                <Label htmlFor={`${id}-bio`} className="text-black">Biography</Label>
                 <Textarea
                   id={`${id}-bio`}
                   placeholder="Write a few sentences about yourself"
@@ -247,11 +247,11 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
                   maxLength={maxLength}
                   onChange={handleChange}
                   aria-describedby={`${id}-description`}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-white border border-gray-300 text-black"
                 />
                 <p
                   id={`${id}-description`}
-                  className="mt-2 text-right text-xs text-white/60"
+                  className="mt-2 text-right text-xs text-gray-500"
                   role="status"
                   aria-live="polite"
                 >
@@ -263,7 +263,7 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
             </form>
           </div>
         </div>
-        <DialogFooter className="border-t border-white/10 px-6 py-4">
+        <DialogFooter className="border-t border-gray-200 px-6 py-4">
           <div className="flex w-full items-center justify-between">
             <Button 
               type="button" 
@@ -275,7 +275,7 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
             </Button>
             <div className="flex gap-2">
               <DialogClose asChild>
-                <Button type="button" variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10">
+                <Button type="button" variant="outline" className="bg-gray-50 border-gray-200 text-white hover:bg-white/10">
                   Cancel
                 </Button>
               </DialogClose>

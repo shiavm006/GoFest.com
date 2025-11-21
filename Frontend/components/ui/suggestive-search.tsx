@@ -105,7 +105,7 @@ export const TypewriterEffect: React.FC<EffectRendererProps> = ({
       }}
     >
       {prefersReducedMotion ? (
-        <span className="text-sm text-muted-foreground select-none">
+        <span className="text-sm text-black select-none">
           {text}
         </span>
       ) : (
@@ -147,7 +147,7 @@ export const TypewriterEffect: React.FC<EffectRendererProps> = ({
             whiteSpace: "nowrap",
           }}
         >
-          <span className="text-sm text-muted-foreground select-none">
+          <span className="text-sm text-black select-none">
             {text}
           </span>
 
@@ -223,7 +223,7 @@ export const SlideEffect: React.FC<EffectRendererProps> = ({
       return () => timers.current.forEach(clearTimeout);
     }, [onDeleteComplete, pauseAfterTypeMs, allowDelete]);
     return (
-      <span className="text-sm text-muted-foreground select-none">{text}</span>
+      <span className="text-sm text-black select-none">{text}</span>
     );
   }
 
@@ -268,7 +268,7 @@ export const SlideEffect: React.FC<EffectRendererProps> = ({
         }}
         style={{ display: "inline-block" }}
       >
-        <span className="text-sm text-muted-foreground select-none">
+        <span className="text-sm text-black select-none">
           {text}
         </span>
       </motion.div>
@@ -321,7 +321,7 @@ export const FadeEffect: React.FC<EffectRendererProps> = ({
       return () => timers.current.forEach(clearTimeout);
     }, [onDeleteComplete, pauseAfterTypeMs, allowDelete]);
     return (
-      <span className="text-sm text-muted-foreground select-none">{text}</span>
+      <span className="text-sm text-black select-none">{text}</span>
     );
   }
 
@@ -365,7 +365,7 @@ export const FadeEffect: React.FC<EffectRendererProps> = ({
         }}
         style={{ display: "inline-block" }}
       >
-        <span className="text-sm text-muted-foreground select-none">
+        <span className="text-sm text-black select-none">
           {text}
         </span>
       </motion.div>
@@ -377,9 +377,9 @@ export const SuggestiveSearch: React.FC<SuggestiveSearchProps> = ({
   onChange,
   suggestions = ["Search your favourite movie", "Search user from connection"],
   className,
-  Leading = () => <Search className="size-4 text-muted-foreground" />,
+  Leading = () => <Search className="size-4 text-black" />,
   showLeading = true,
-  Trailing = () => <Search className="size-4 text-muted-foreground" />,
+  Trailing = () => <Search className="size-4 text-black" />,
   showTrailing = false,
   effect = "typewriter",
   EffectComponent,
@@ -514,7 +514,7 @@ export const SuggestiveSearch: React.FC<SuggestiveSearchProps> = ({
     <div
       ref={wrapperRef}
       className={cn(
-        "relative flex items-center gap-x-2 py-2 px-4 border border-gray-200 dark:border-gray-800 rounded-full",
+        "relative flex items-center gap-x-2 py-2 px-4 border border-gray-300 rounded-full bg-white",
         className
       )}
       style={{ maxWidth: "100%" }}
@@ -530,7 +530,7 @@ export const SuggestiveSearch: React.FC<SuggestiveSearchProps> = ({
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         onChange={(e) => handleInputChange(e.target.value)}
-        className="bg-transparent outline-none text-sm text-foreground placeholder:text-transparent w-full"
+        className="bg-transparent outline-none text-sm text-black placeholder:text-gray-400 w-full"
         placeholder=""
         aria-label="search"
         style={
