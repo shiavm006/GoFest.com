@@ -22,7 +22,7 @@ import {
   Clock,
   Trophy,
 } from "lucide-react";
-import { createFest, deleteFest, getAuthToken, getMyHostedFests, updateFest, type Fest } from "@/lib/api";
+import { API_BASE_URL, createFest, deleteFest, getAuthToken, getMyHostedFests, updateFest, type Fest } from "@/lib/api";
 
 export default function HostFestPage() {
   const router = useRouter();
@@ -193,9 +193,9 @@ export default function HostFestPage() {
         try {
           const { latitude, longitude } = position.coords;
           const token = getAuthToken();
-          
+
           const response = await fetch(
-            `http://localhost:8000/api/location/reverse-geocode?lat=${latitude}&lon=${longitude}`,
+            `${API_BASE_URL}/api/location/reverse-geocode?lat=${latitude}&lon=${longitude}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
