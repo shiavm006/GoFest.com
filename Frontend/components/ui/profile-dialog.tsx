@@ -5,6 +5,7 @@ import { useImageUpload } from "@/components/hooks/use-image-upload";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useId } from "react";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/api";
 import {
   Dialog,
   DialogClose,
@@ -136,7 +137,7 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        const response = await fetch('http://localhost:8000/api/auth/me', {
+        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -199,7 +200,7 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
                     <Label htmlFor={`${id}-full-name`} className="text-black">Full Name</Label>
                     <Input
                       id={`${id}-full-name`}
-                      placeholder="John Doe"
+                      placeholder="Your full name"
                       value={userData?.name || ''}
                       type="text"
                       disabled
