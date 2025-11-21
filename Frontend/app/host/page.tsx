@@ -572,6 +572,7 @@ export default function HostFestPage() {
                   <Input
                     label="Date *"
                     placeholder="e.g., March 15-17, 2025"
+                    type="date"
                     value={festData.date}
                     onChange={(value) => handleInputChange("date", value)}
                     required
@@ -838,6 +839,7 @@ export default function HostFestPage() {
                       <Input
                         label="Date *"
                         placeholder="e.g., March 15, 2025"
+                        type="date"
                         value={currentEvent.date}
                         onChange={(value) => setCurrentEvent({ ...currentEvent, date: value })}
                         size="large"
