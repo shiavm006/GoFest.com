@@ -7,23 +7,32 @@ import "leaflet/dist/leaflet.css";
 import type { Fest } from "@/lib/api";
 import { API_BASE_URL } from "@/lib/api";
 
-// Fix for default marker icons in Next.js
-const iconRetinaUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png";
-const iconUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png";
-const shadowUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png";
+// Create custom red marker icon using SVG
+const createRedMarkerIcon = () => {
+  return L.divIcon({
+    className: 'custom-red-marker',
+    html: `
+      <div style="
+        width: 30px;
+        height: 40px;
+        position: relative;
+        transform: translate(-50%, -100%);
+      ">
+        <svg width="30" height="40" viewBox="0 0 30 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 0C6.716 0 0 6.716 0 15C0 26.25 15 40 15 40C15 40 30 26.25 30 15C30 6.716 23.284 0 15 0Z" fill="#EF4444"/>
+          <path d="M15 0C6.716 0 0 6.716 0 15C0 26.25 15 40 15 40C15 40 30 26.25 30 15C30 6.716 23.284 0 15 0Z" fill="#DC2626" opacity="0.8"/>
+          <circle cx="15" cy="15" r="8" fill="white"/>
+          <circle cx="15" cy="15" r="5" fill="#EF4444"/>
+        </svg>
+      </div>
+    `,
+    iconSize: [30, 40],
+    iconAnchor: [15, 40],
+    popupAnchor: [0, -40],
+  });
+};
 
-const DefaultIcon = L.icon({
-  iconRetinaUrl,
-  iconUrl,
-  shadowUrl,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  tooltipAnchor: [16, -28],
-  shadowSize: [41, 41],
-});
-
-L.Marker.prototype.options.icon = DefaultIcon;
+const RedMarkerIcon = createRedMarkerIcon();
 
 interface EventsMapProps {
   fests: Fest[];
@@ -242,12 +251,13 @@ export default function EventsMap({ fests, selectedFest, onFestClick }: EventsMa
   }
 
   return (
-    <div className="h-full w-full rounded-lg overflow-hidden border border-gray-200">
+    <div className="h-full w-full rounded-lg overflow-hidden border-2 border-gray-300 shadow-lg map-container">
       <MapContainer
         center={getCenter()}
         zoom={festsWithCoords.length > 0 ? 10 : 6}
-        style={{ height: "100%", width: "100%" }}
+        style={{ height: "100%", width: "100%", borderRadius: "8px" }}
         scrollWheelZoom={true}
+        className="custom-map"
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -264,20 +274,22 @@ export default function EventsMap({ fests, selectedFest, onFestClick }: EventsMa
             <Marker
               key={fest._id}
               position={[lat, lng]}
+              icon={RedMarkerIcon}
               eventHandlers={{
                 click: () => {
                   onFestClick(fest);
                 },
               }}
             >
-              <Popup>
-                <div className="p-2">
-                  <h3 className="font-semibold text-sm mb-1">{fest.title}</h3>
-                  <p className="text-xs text-gray-600 mb-1">{fest.college}</p>
-                  <p className="text-xs text-gray-500">
-                    {fest.location?.city}, {fest.location?.state}
+              <Popup className="custom-popup">
+                <div className="popup-content">
+                  <h3 className="popup-title">{fest.title}</h3>
+                  <p className="popup-college">{fest.college}</p>
+                  <div className="popup-divider"></div>
+                  <p className="popup-location">
+                    📍 {fest.location?.city}, {fest.location?.state}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">{fest.date}</p>
+                  <p className="popup-date">📅 {fest.date}</p>
                 </div>
               </Popup>
             </Marker>
