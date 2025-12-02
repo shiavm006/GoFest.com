@@ -62,6 +62,7 @@ export default function HostFestPage() {
       city: "",
       state: "",
       address: "",
+      coordinates: [] as number[],
     },
     organizer: {
       name: "",
@@ -193,7 +194,7 @@ export default function HostFestPage() {
         try {
           const { latitude, longitude } = position.coords;
           const token = getAuthToken();
-
+          
           const response = await fetch(
             `${API_BASE_URL}/api/location/reverse-geocode?lat=${latitude}&lon=${longitude}`,
             {
@@ -216,6 +217,7 @@ export default function HostFestPage() {
               ...prev.location,
               city: data.location.city,
               state: data.location.state,
+              coordinates: [longitude, latitude], // [lng, lat] format for Leaflet
             },
           }));
         } catch (err: any) {
@@ -283,24 +285,24 @@ export default function HostFestPage() {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 flex justify-between items-center px-8 py-3 gap-6">
-        <Link href="/" className="text-2xl font-extrabold tracking-tight whitespace-nowrap text-black">
-          gofest.com
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 flex justify-between items-center px-8 py-5 gap-6">
+        <Link href="/" className="text-3xl tracking-tight whitespace-nowrap text-black" style={{ fontFamily: 'var(--font-caveat-brush)' }}>
+          Gofest.com
         </Link>
 
         <div className="flex items-center gap-2">
-          <nav className="hidden md:flex gap-6 text-sm">
-            <Link href="/" className="text-black hover:text-gray-800 transition-colors">
+          <nav className="hidden md:flex gap-6 text-base">
+            <Link href="/" className="text-black hover:text-gray-800 transition-colors pb-1 hover:border-b-2 hover:border-black" style={{ fontFamily: 'var(--font-audiowide)' }}>
               Home
             </Link>
-            <Link href="/events" className="text-black hover:text-gray-800 transition-colors">
+            <Link href="/events" className="text-black hover:text-gray-800 transition-colors pb-1 hover:border-b-2 hover:border-black" style={{ fontFamily: 'var(--font-audiowide)' }}>
               Events
             </Link>
-            <Link href="/host" className="text-black hover:text-gray-800 transition-colors">
-              HOST
+            <Link href="/host" className="text-black hover:text-gray-800 transition-colors pb-1 hover:border-b-2 hover:border-black" style={{ fontFamily: 'var(--font-audiowide)' }}>
+              Host
             </Link>
             {!isLoggedIn && (
-              <Link href="/login" className="text-black hover:text-gray-800 transition-colors">
+              <Link href="/login" className="text-black hover:text-gray-800 transition-colors pb-1 hover:border-b-2 hover:border-black" style={{ fontFamily: 'var(--font-audiowide)' }}>
                 Login
               </Link>
             )}
@@ -322,7 +324,7 @@ export default function HostFestPage() {
               <button
                 type="button"
                 onClick={() => setView("form")}
-                className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-black hover:bg-white/90 transition-colors"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-medium text-black hover:bg-white/90 transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 Host a new fest
@@ -345,7 +347,7 @@ export default function HostFestPage() {
                 <button
                   type="button"
                   onClick={() => setView("form")}
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-black hover:bg-white/90 transition-colors"
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-medium text-black hover:bg-white/90 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
                   Host your first fest
@@ -379,6 +381,7 @@ export default function HostFestPage() {
                               city: fest.location?.city || "",
                               state: fest.location?.state || "",
                               address: fest.location?.address || "",
+                              coordinates: fest.location?.coordinates || [],
                             },
                             organizer: {
                               name: fest.organizer?.name || "",
@@ -477,7 +480,7 @@ export default function HostFestPage() {
                     {editingFestId
                       ? "Update the details of your college fest"
                       : "Fill in the details below to list your college fest on our platform"}
-                  </p>
+            </p>
                 </div>
                 <button
                   type="button"
@@ -489,7 +492,7 @@ export default function HostFestPage() {
                 >
                   ← Back to your hosted fests
                 </button>
-              </div>
+          </div>
 
           {error && (
             <div className="bg-red-500/10 border border-red-500/50 text-red-500 px-6 py-4 rounded-lg mb-8">
@@ -587,15 +590,15 @@ export default function HostFestPage() {
                   />
                 </div>
 
-                <Input
+                  <Input
                   label="Expected Footfall (optional)"
                   placeholder="e.g., 5000+ students"
                   value={festData.expectedFootfall}
                   onChange={(value) => handleInputChange("expectedFootfall", value)}
-                  size="large"
+                    size="large"
                   prefix={<Users className="w-4 h-4" />}
                   prefixStyling={false}
-                />
+                  />
               </div>
             </section>
 
@@ -906,7 +909,7 @@ export default function HostFestPage() {
                     <button
                       type="button"
                       onClick={addEvent}
-                      className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-semibold shadow-sm"
+                      className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-medium shadow-sm"
                     >
                       <Plus className="w-5 h-5" />
                       Add Event to Fest
@@ -939,17 +942,17 @@ export default function HostFestPage() {
                                     {event.category}
                                   </span>
                                   <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-gray-700">
-                                    <div className="flex items-center gap-1.5">
-                                      <Calendar className="w-3.5 h-3.5" />
+                                      <div className="flex items-center gap-1.5">
+                                        <Calendar className="w-3.5 h-3.5" />
                                       <span>{event.date}</span>
-                                    </div>
+                                      </div>
                                     <div className="flex items-center gap-1.5">
                                       <Clock className="w-3.5 h-3.5" />
                                       <span>{event.time}</span>
                                     </div>
-                                    <div className="flex items-center gap-1.5">
-                                      <MapPin className="w-3.5 h-3.5" />
-                                      <span>{event.venue}</span>
+                                      <div className="flex items-center gap-1.5">
+                                        <MapPin className="w-3.5 h-3.5" />
+                                        <span>{event.venue}</span>
                                     </div>
                                     {event.prize && (
                                       <div className="flex items-center gap-1.5">
@@ -958,10 +961,10 @@ export default function HostFestPage() {
                                       </div>
                                     )}
                                     {event.limit && (
-                                      <div className="flex items-center gap-1.5">
-                                        <Users className="w-3.5 h-3.5" />
+                                    <div className="flex items-center gap-1.5">
+                                      <Users className="w-3.5 h-3.5" />
                                         <span>{event.limit}</span>
-                                      </div>
+                                    </div>
                                     )}
                                   </div>
                                 </div>
@@ -998,7 +1001,7 @@ export default function HostFestPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="px-4 py-2 rounded-lg bg-red-500 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 rounded-lg bg-red-500 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
               >
                 {isLoading
                   ? editingFestId

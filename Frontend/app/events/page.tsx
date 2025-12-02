@@ -3,12 +3,23 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import SuggestiveSearch from "@/components/ui/suggestive-search";
 import { ProfileButton } from "@/components/ui/profile-button";
 import Pagination from "@/components/ui/pagination";
 import { ArrowUpRight, Loader2 } from "lucide-react";
 import { PlaceCard } from "@/components/ui/card-22";
 import { getAuthToken, fetchFests, type Fest } from "@/lib/api";
+
+// Dynamically import map component to avoid SSR issues
+const EventsMap = dynamic(() => import("@/components/ui/events-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center">
+      <p className="text-gray-500">Loading map...</p>
+    </div>
+  ),
+});
 
 
 
@@ -23,6 +34,7 @@ export default function EventsPage() {
   const [totalFests, setTotalFests] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFest, setSelectedFest] = useState<Fest | null>(null);
 
   useEffect(() => {
     const token = getAuthToken();
@@ -75,12 +87,32 @@ export default function EventsPage() {
     router.push(`/events/${slug}`);
   };
 
+  const handleFestClick = (fest: Fest) => {
+    setSelectedFest(fest);
+    // Scroll to the event card if it's visible
+    const element = document.getElementById(`fest-${fest._id}`);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  };
+
+  const handleCardClick = (fest: Fest) => {
+    setSelectedFest(fest);
+    // If fest has coordinates, the map will automatically focus on it
+    // Otherwise, navigate to the event page
+    if (fest.location?.coordinates && fest.location.coordinates.length === 2) {
+      // Map will handle the focus via MapController
+    } else {
+      handleExplore(fest.slug);
+    }
+  };
+
   return (
     <div className="min-h-screen relative bg-white">
       
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 flex justify-between items-center px-8 py-3 gap-6">
-        <Link href="/" className="text-2xl font-extrabold tracking-tight whitespace-nowrap text-black">
-          gofest.com
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 flex justify-between items-center px-8 py-5 gap-6">
+        <Link href="/" className="text-3xl tracking-tight whitespace-nowrap text-black" style={{ fontFamily: 'var(--font-caveat-brush)' }}>
+          Gofest.com
         </Link>
         
         <div className="flex-1 max-w-md">
@@ -98,18 +130,18 @@ export default function EventsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <nav className="hidden md:flex gap-6 text-sm">
-            <Link href="/" className="text-black hover:text-gray-800 transition-colors">
+          <nav className="hidden md:flex gap-6 text-base">
+            <Link href="/" className="text-black hover:text-gray-800 transition-colors pb-1 hover:border-b-2 hover:border-black" style={{ fontFamily: 'var(--font-audiowide)' }}>
               Home
             </Link>
-            <Link href="/events" className="text-black hover:text-gray-800 transition-colors">
+            <Link href="/events" className="text-black hover:text-gray-800 transition-colors pb-1 hover:border-b-2 hover:border-black" style={{ fontFamily: 'var(--font-audiowide)' }}>
               Events
             </Link>
-            <Link href="/host" className="text-black hover:text-gray-800 transition-colors">
-              HOST
+            <Link href="/host" className="text-black hover:text-gray-800 transition-colors pb-1 hover:border-b-2 hover:border-black" style={{ fontFamily: 'var(--font-audiowide)' }}>
+              Host
             </Link>
             {!isLoggedIn && (
-              <Link href="/login" className="text-black hover:text-gray-800 transition-colors">
+              <Link href="/login" className="text-black hover:text-gray-800 transition-colors pb-1 hover:border-b-2 hover:border-black" style={{ fontFamily: 'var(--font-audiowide)' }}>
                 Login
               </Link>
             )}
@@ -142,15 +174,10 @@ export default function EventsPage() {
             {/* Map Section - 30% */}
             <aside className="w-[30%] hidden lg:block">
               <div className="sticky top-24 h-[calc(100vh-150px)] min-h-[600px]">
-                <iframe
-                  className="h-full w-full"
-                  frameBorder="0"
-                  style={{ border: 0 }}
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3769.0!2d77.2090!3d28.6139!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cfd5b347ebbef%3A0x37107b149c0d4c65!2sNew%20Delhi%2C%20Delhi!5e0!3m2!1sen!2sin!4v1234567890"
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Fest Locations Map"
+                <EventsMap
+                  fests={fests}
+                  selectedFest={selectedFest}
+                  onFestClick={handleFestClick}
                 />
               </div>
             </aside>
@@ -159,8 +186,16 @@ export default function EventsPage() {
             <div className="flex-1 lg:w-[70%]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
               {displayFests.map((event: Fest) => {
+                const isSelected = selectedFest?._id === event._id;
                 return (
-                      <div key={event._id} onClick={() => handleExplore(event.slug)} className="cursor-pointer">
+                      <div
+                        key={event._id}
+                        id={`fest-${event._id}`}
+                        onClick={() => handleCardClick(event)}
+                        className={`cursor-pointer transition-all ${
+                          isSelected ? "ring-2 ring-blue-500 ring-offset-2 rounded-lg" : ""
+                        }`}
+                      >
                         <PlaceCard
                           images={[event.image]}
                           tags={[event.category, event.location?.city || ""]}

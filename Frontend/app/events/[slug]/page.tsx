@@ -46,7 +46,7 @@ export default function FestDetailPage() {
   useEffect(() => {
     async function checkRegistration() {
       if (!fest) return;
-      const token = getAuthToken();
+    const token = getAuthToken();
       if (!token) return;
 
       try {
@@ -59,7 +59,7 @@ export default function FestDetailPage() {
       } catch (err) {
         // silently ignore – registration info is just for UX
         console.error("Failed to check registration status:", err);
-      }
+    }
     }
 
     checkRegistration();
@@ -92,7 +92,7 @@ export default function FestDetailPage() {
         setIsAlreadyRegistered(true);
         setRegistrationSuccess(true);
         alert("You have already registered for this fest.");
-      } else {
+    } else {
         alert(message);
       }
     } finally {
@@ -106,7 +106,7 @@ export default function FestDetailPage() {
         <Loader2 className="w-12 h-12 animate-spin text-gray-500" />
       </div>
     );
-  }
+    }
 
   if (!fest) {
     return (
@@ -166,14 +166,14 @@ export default function FestDetailPage() {
               <div className="inline-flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-white/80" />
                 <span>{fest.location.city}, {fest.location.state}</span>
-              </div>
+            </div>
               <div className="inline-flex items-center gap-2">
                 <Users className="w-4 h-4 text-white/80" />
                 <span>{fest.registrationsCount} registered</span>
-              </div>
+            </div>
             </div>
           </div>
-        </div>
+            </div>
       </section>
 
       {/* 2. Quick Info Bar */}
@@ -184,10 +184,10 @@ export default function FestDetailPage() {
             <p className="text-sm text-gray-600">{fest.college}</p>
           </div>
             <div className="flex flex-col items-end gap-1">
-              <button 
-                onClick={handleRegisterClick}
+            <button 
+              onClick={handleRegisterClick}
                 disabled={isRegistering || registrationSuccess || isAlreadyRegistered}
-                className="px-6 py-2 bg-[#FFD95A] text-black rounded-lg font-semibold hover:bg-[#f5c941] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-6 py-2 bg-[#FFD95A] text-black rounded-lg font-medium hover:bg-[#f5c941] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isRegistering ? (
                   <>
@@ -199,13 +199,13 @@ export default function FestDetailPage() {
                 ) : (
                   "Register Now"
                 )}
-              </button>
+            </button>
               {(registrationSuccess || isAlreadyRegistered) && (
                 <span className="text-xs text-green-700">
                   You have already registered for this fest.
                 </span>
               )}
-            </div>
+          </div>
         </div>
       </section>
 
@@ -233,7 +233,7 @@ export default function FestDetailPage() {
                       className="bg-white border border-gray-200 rounded-lg p-5 hover:border-gray-300 transition-colors"
                     >
                       <div className="flex justify-between items-start mb-2.5">
-                        <div>
+            <div>
                           <h4 className="text-base font-semibold text-gray-900">{event.name}</h4>
                           <span className="mt-1 inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-800">
                             {event.category}
@@ -245,7 +245,7 @@ export default function FestDetailPage() {
                             <div className="text-sm font-semibold text-gray-900">{event.prize}</div>
                           </div>
                         )}
-                      </div>
+            </div>
                       <div className="flex flex-wrap gap-3 text-xs md:text-sm text-gray-700">
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4" />
@@ -383,7 +383,7 @@ export default function FestDetailPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                       className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-all group text-gray-800"
-                    >
+              >
                       <div className="flex items-center gap-2">
                         <Download className="w-4 h-4" />
                         <span className="text-sm font-medium">Download Brochure</span>

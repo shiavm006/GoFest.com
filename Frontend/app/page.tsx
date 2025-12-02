@@ -40,24 +40,24 @@ export default function Home() {
   return (
     <div className="relative w-full min-h-screen overflow-hidden">
       {/* Navbar */}
-      <header className="fixed top-0 left-0 right-0 z-[110] bg-white border-b border-gray-200 flex justify-between items-center px-8 py-3 gap-6">
-        <Link href="/" className="text-2xl font-extrabold tracking-tight whitespace-nowrap text-black relative z-10">
-          gofest.com
+      <header className="fixed top-0 left-0 right-0 z-[110] bg-white border-b border-gray-200 flex justify-between items-center px-8 py-5 gap-6">
+        <Link href="/" className="text-3xl tracking-tight whitespace-nowrap text-black relative z-10" style={{ fontFamily: 'var(--font-caveat-brush)' }}>
+          Gofest.com
         </Link>
 
         <div className="flex items-center gap-2 relative z-10">
-          <nav className="hidden md:flex gap-6 text-sm">
-            <Link href="/" className="text-black hover:text-gray-800 transition-colors relative z-10">
+          <nav className="hidden md:flex gap-6 text-base">
+            <Link href="/" className="text-black hover:text-gray-800 transition-colors relative z-10 pb-1 hover:border-b-2 hover:border-black" style={{ fontFamily: 'var(--font-audiowide)' }}>
               Home
             </Link>
-            <Link href="/events" className="text-black hover:text-gray-800 transition-colors relative z-10">
+            <Link href="/events" className="text-black hover:text-gray-800 transition-colors relative z-10 pb-1 hover:border-b-2 hover:border-black" style={{ fontFamily: 'var(--font-audiowide)' }}>
               Events
             </Link>
-            <Link href="/host" className="text-black hover:text-gray-800 transition-colors relative z-10">
-              HOST
+            <Link href="/host" className="text-black hover:text-gray-800 transition-colors relative z-10 pb-1 hover:border-b-2 hover:border-black" style={{ fontFamily: 'var(--font-audiowide)' }}>
+              Host
             </Link>
             {!isLoggedIn && (
-              <Link href="/login" className="text-black hover:text-gray-800 transition-colors relative z-10">
+              <Link href="/login" className="text-black hover:text-gray-800 transition-colors relative z-10 pb-1 hover:border-b-2 hover:border-black" style={{ fontFamily: 'var(--font-audiowide)' }}>
                 Login
               </Link>
             )}
@@ -68,15 +68,15 @@ export default function Home() {
         </div>
       </header>
 
+      {/* Yellow Banner - Fixed below navbar */}
+      <div className="fixed top-[68px] left-0 right-0 z-[100] bg-[#FFD95A] text-black py-3 px-6 text-center font-medium">
+        <div className="flex items-center justify-center">
+          <span>Discover amazing college fests, cultural events & competitions across India!</span>
+        </div>
+      </div>
+
       {/* Image Grid Background */}
       <div className="fixed inset-0 top-0 overflow-hidden pointer-events-none">
-        
-        {/* Top Banner */}
-        <div className="absolute top-[64px] left-0 right-0 z-50 bg-[#FFD95A] text-black py-3 px-6 text-center font-medium pointer-events-auto" data-banner>
-          <div className="flex items-center justify-center">
-            <span>Discover amazing college fests, cultural events & competitions across India!</span>
-          </div>
-        </div>
         <div className="columns-6 gap-2 p-2 space-y-2">
           {images.map((src, idx) => (
             <div
@@ -115,20 +115,20 @@ export default function Home() {
               Hi, we're GoFest!
             </h1>
             
-            <p className="text-black text-lg mb-8 leading-relaxed">
+            <p className="text-black text-lg mb-4 leading-relaxed">
               Welcome to the one platform for all college fests, cultural events, and competitions. 
               Discover amazing events happening in colleges across India and never miss out on the action!
             </p>
 
-            <div className="space-y-6">
+            <div className="flex flex-col gap-1">
               <Link href="/events">
-                <button className="w-full bg-[#2D5BFF] text-white font-semibold py-4 px-8 rounded-full hover:bg-[#2448CC] transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]">
+                <button className="w-full bg-[#2D5BFF] text-white font-medium text-base py-4 px-8 rounded-full hover:bg-[#2448CC] transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]">
                   Explore Fests Now
                 </button>
               </Link>
 
               <Link href="/host">
-                <button className="w-full border-2 border-[#2D5BFF] text-[#2D5BFF] font-semibold py-4 px-8 rounded-full hover:bg-[#2D5BFF] hover:text-white transition-all">
+                <button className="w-full border-2 border-[#2D5BFF] text-[#2D5BFF] font-medium text-base py-4 px-8 rounded-full hover:bg-[#2D5BFF] hover:text-white transition-all">
                   Host Your Own Fest
                 </button>
               </Link>

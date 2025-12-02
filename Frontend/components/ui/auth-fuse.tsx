@@ -90,7 +90,7 @@ export function Typewriter({
 }
 
 const labelVariants = cva(
-  "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+  "text-sm font-medium leading-none text-black peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 );
 
 const Label = React.forwardRef<
@@ -148,7 +148,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
       <input
         type={type}
         className={cn(
-          "flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-sm text-black shadow-sm shadow-black/5 transition-shadow placeholder:text-gray-500/80 focus-visible:border-blue-600 focus-visible:ring-[3px] focus-visible:ring-blue-600/20 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+          "flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-sm text-gray-900 shadow-sm shadow-black/5 transition-shadow placeholder:text-gray-500/80 focus-visible:border-blue-600 focus-visible:ring-[3px] focus-visible:ring-blue-600/20 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
         ref={ref}
@@ -172,7 +172,7 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
         {label && <Label htmlFor={id}>{label}</Label>}
         <div className="relative">
           <Input id={id} type={showPassword ? "text" : "password"} className={cn("pe-10", className)} ref={ref} {...props} />
-          <button type="button" onClick={togglePasswordVisibility} className="absolute inset-y-0 end-0 flex h-full w-10 items-center justify-center text-muted-foreground/80 transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50" aria-label={showPassword ? "Hide password" : "Show password"}>
+          <button type="button" onClick={togglePasswordVisibility} className="absolute inset-y-0 end-0 flex h-full w-10 items-center justify-center text-gray-500 transition-colors hover:text-gray-700 focus-visible:text-gray-700 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50" aria-label={showPassword ? "Hide password" : "Show password"}>
             {showPassword ? (<EyeOff className="size-4" aria-hidden="true" />) : (<Eye className="size-4" aria-hidden="true" />)}
           </button>
         </div>
@@ -211,8 +211,8 @@ function SignInForm() {
   return (
     <form onSubmit={handleSignIn} autoComplete="on" className="flex flex-col gap-8">
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Sign in to your account</h1>
-        <p className="text-balance text-sm text-muted-foreground">Enter your email below to sign in</p>
+        <h1 className="text-2xl font-bold text-black">Sign in to your account</h1>
+        <p className="text-balance text-sm text-gray-600">Enter your email below to sign in</p>
       </div>
       {error && (
         <div className="text-sm text-red-500 text-center bg-red-50 dark:bg-red-900/20 p-3 rounded">
@@ -222,7 +222,7 @@ function SignInForm() {
       <div className="grid gap-4">
         <div className="grid gap-2"><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" placeholder="m@example.com" required autoComplete="email" /></div>
         <PasswordInput name="password" label="Password" required autoComplete="current-password" placeholder="Password" />
-        <Button type="submit" variant="outline" className="mt-2" disabled={isLoading}>
+        <Button type="submit" variant="outline" className="mt-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600" disabled={isLoading}>
           {isLoading ? "Signing in..." : "Sign In"}
         </Button>
       </div>
@@ -264,8 +264,8 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
   return (
     <form onSubmit={handleSignUp} autoComplete="on" className="flex flex-col gap-8">
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Create an account</h1>
-        <p className="text-balance text-sm text-muted-foreground">Enter your details below to sign up</p>
+        <h1 className="text-2xl font-bold text-black">Create an account</h1>
+        <p className="text-balance text-sm text-gray-600">Enter your details below to sign up</p>
       </div>
       {error && (
         <div className="text-sm text-red-500 text-center bg-red-50 dark:bg-red-900/20 p-3 rounded">
@@ -282,7 +282,7 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
         <div className="grid gap-2"><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" placeholder="m@example.com" required autoComplete="email" /></div>
         <div className="grid gap-2"><Label htmlFor="phone">Phone Number</Label><Input id="phone" name="phone" type="tel" placeholder="+91 98765 43210" required autoComplete="tel" /></div>
         <PasswordInput name="password" label="Password" required autoComplete="new-password" placeholder="Password"/>
-        <Button type="submit" variant="outline" className="mt-2" disabled={isLoading || success}>
+        <Button type="submit" variant="outline" className="mt-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600" disabled={isLoading || success}>
           {isLoading ? "Signing up..." : success ? "Success!" : "Sign Up"}
         </Button>
       </div>
@@ -294,9 +294,9 @@ function AuthFormContainer({ isSignIn, onToggle }: { isSignIn: boolean; onToggle
     return (
         <div className="mx-auto grid w-[350px] gap-2">
             {isSignIn ? <SignInForm /> : <SignUpForm onSuccess={onToggle} />}
-            <div className="text-center text-sm">
+            <div className="text-center text-sm text-black">
                 {isSignIn ? "Don't have an account?" : "Already have an account?"}{" "}
-                <Button variant="link" className="pl-1 text-foreground" onClick={onToggle}>
+                <Button variant="link" className="pl-1 text-black hover:text-gray-700" onClick={onToggle}>
                     {isSignIn ? "Sign up" : "Sign in"}
                 </Button>
             </div>
@@ -365,8 +365,8 @@ export function AuthUI({ signInContent = {}, signUpContent = {} }: AuthUIProps) 
           display: none;
         }
       `}</style>
-      <div className="flex h-screen items-center justify-center p-6 md:h-auto md:p-0 md:py-12 relative">
-        <Link href="/" className="absolute left-4 top-4 text-sm text-foreground/80 hover:text-foreground transition-colors">
+      <div className="flex h-screen items-center justify-center p-6 md:h-auto md:p-0 md:py-12 relative bg-white">
+        <Link href="/" className="absolute left-4 top-4 text-sm text-black/80 hover:text-black transition-colors">
           ← Back home
         </Link>
         <AuthFormContainer isSignIn={isSignIn} onToggle={toggleForm} />

@@ -26,7 +26,7 @@ export function HeroSection03() {
     <div className="min-h-screen relative">
       <div className="w-full absolute h-full z-0 bg-[radial-gradient(circle,_black_1px,_transparent_1px)] dark:bg-[radial-gradient(circle,_white_1px,_transparent_1px)] opacity-15 [background-size:20px_20px]"/>
         <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex justify-between items-center px-8 py-6">
-          <div className="text-2xl font-extrabold tracking-tight cursor-pointer">gofest.com</div>
+          <div className="text-2xl tracking-tight cursor-pointer" style={{ fontFamily: 'var(--font-caveat-brush)' }}>Gofest.com</div>
           <div className="flex items-center gap-2">
             <nav className="hidden md:flex gap-6 text-sm">
               <Link
