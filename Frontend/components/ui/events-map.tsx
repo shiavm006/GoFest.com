@@ -250,9 +250,19 @@ export default function EventsMap({ fests, selectedFest, onFestClick }: EventsMa
     );
   }
 
+  // Additional safety check for fests with coordinates
+  if (festsWithCoords.length === 0) {
+    return (
+      <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
+        <p className="text-gray-500">No locations to display</p>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full w-full rounded-lg overflow-hidden border-2 border-gray-300 shadow-lg map-container">
       <MapContainer
+        key={festsWithCoords.map(f => f._id).join('-')}
         center={getCenter()}
         zoom={festsWithCoords.length > 0 ? 10 : 6}
         style={{ height: "100%", width: "100%", borderRadius: "8px" }}

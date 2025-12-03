@@ -3,10 +3,20 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { CartoonButton } from "@/components/ui/cartoon-button";
 import { ProfileButton } from "@/components/ui/profile-button";
 import { ArrowLeft, MapPin, Calendar, Clock, Users, Mail, Phone, Instagram, Linkedin, ExternalLink, Download, Loader2 } from "lucide-react";
 import { getAuthToken, fetchFestBySlug, registerForFest, getMyRegistrations, type Fest, type Registration } from "@/lib/api";
+
+const EventsMap = dynamic(() => import("@/components/ui/events-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center">
+      <p className="text-gray-500">Loading map...</p>
+    </div>
+  ),
+});
 
 export default function FestDetailPage() {
   const params = useParams();
@@ -103,7 +113,7 @@ export default function FestDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <Loader2 className="w-12 h-12 animate-spin text-gray-500" />
+        <Loader2 className="w-12 h-12 animate-spin text-black" />
       </div>
     );
     }
@@ -123,6 +133,32 @@ export default function FestDetailPage() {
       </div>
     );
   }
+
+  // Generate Google Maps URL for navigation
+  const googleMapsUrl = (() => {
+    const loc = fest.location;
+    if (!loc) return "#";
+
+    // Best: use exact coordinates if available
+    if (loc.coordinates && loc.coordinates.length === 2) {
+      const [lng, lat] = loc.coordinates;
+      return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    }
+
+    // Fallback: use text address / city / state
+    const parts = [
+      loc.address || "",
+      loc.city || "",
+      loc.state || "",
+      "India",
+    ].filter(Boolean);
+
+    if (parts.length === 0) return "#";
+
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      parts.join(", ")
+    )}`;
+  })();
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -149,7 +185,7 @@ export default function FestDetailPage() {
 
         <div className="relative z-10 flex flex-col justify-end h-full px-6 lg:px-16 pb-10">
           <div className="max-w-3xl space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium bg-white/90 text-gray-900 rounded-full shadow-sm">
+            <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium bg-white/90 text-black rounded-full shadow-sm">
               {fest.category}
             </div>
             <h1 className="text-3xl md:text-5xl font-semibold text-white leading-tight">
@@ -181,7 +217,7 @@ export default function FestDetailPage() {
         <div className="px-6 lg:px-16 py-4 flex flex-wrap justify-between items-center gap-4">
           <div>
             <h2 className="text-xl font-semibold text-black">{fest.title}</h2>
-            <p className="text-sm text-gray-600">{fest.college}</p>
+            <p className="text-sm text-black">{fest.college}</p>
           </div>
             <div className="flex flex-col items-end gap-1">
             <button 
@@ -216,16 +252,45 @@ export default function FestDetailPage() {
           <div className="lg:col-span-2 space-y-12">
             {/* About */}
             <section className="space-y-3">
-              <h3 className="text-lg font-semibold text-gray-900">About {fest.title}</h3>
-              <p className="text-sm md:text-base text-gray-700 leading-relaxed">
+              <h3 className="text-lg font-semibold text-black">About {fest.title}</h3>
+              <p className="text-sm md:text-base text-black leading-relaxed">
                 {fest.description}
               </p>
             </section>
 
+            {/* Location */}
+            {fest.location && (
+              <section className="space-y-3">
+                <h3 className="text-lg font-semibold text-black">Location</h3>
+                <p className="text-sm text-black">
+                  {fest.location.address && `${fest.location.address}, `}
+                  {fest.location.city}, {fest.location.state}
+                </p>
+
+                <div className="h-64 w-full rounded-lg overflow-hidden border border-gray-300">
+                  <EventsMap
+                    fests={[fest]}
+                    selectedFest={fest}
+                    onFestClick={() => {}}
+                  />
+                </div>
+
+                <a
+                  href={googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                >
+                  Open in Google Maps
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </section>
+            )}
+
             {/* Events Schedule */}
             {fest.events && fest.events.length > 0 && (
               <section className="space-y-3">
-                <h3 className="text-lg font-semibold text-gray-900">Events & Activities</h3>
+                <h3 className="text-lg font-semibold text-black">Events & Activities</h3>
                 <div className="space-y-3">
                   {fest.events.map((event, idx) => (
                     <div
@@ -234,19 +299,19 @@ export default function FestDetailPage() {
                     >
                       <div className="flex justify-between items-start mb-2.5">
             <div>
-                          <h4 className="text-base font-semibold text-gray-900">{event.name}</h4>
-                          <span className="mt-1 inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-800">
+                          <h4 className="text-base font-semibold text-black">{event.name}</h4>
+                          <span className="mt-1 inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-black">
                             {event.category}
                           </span>
                         </div>
                         {event.prize && (
                           <div className="text-right">
-                            <div className="text-xs text-gray-500">Prize</div>
-                            <div className="text-sm font-semibold text-gray-900">{event.prize}</div>
+                            <div className="text-xs text-black">Prize</div>
+                            <div className="text-sm font-semibold text-black">{event.prize}</div>
                           </div>
                         )}
             </div>
-                      <div className="flex flex-wrap gap-3 text-xs md:text-sm text-gray-700">
+                      <div className="flex flex-wrap gap-3 text-xs md:text-sm text-black">
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4" />
                           {event.date}
@@ -277,48 +342,48 @@ export default function FestDetailPage() {
           <div className="space-y-6">
             {/* Event Details Card */}
             <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-              <h4 className="text-sm font-semibold mb-3 text-gray-900 uppercase tracking-[0.14em]">
+              <h4 className="text-sm font-semibold mb-3 text-black uppercase tracking-[0.14em]">
                 Event details
               </h4>
-              <div className="space-y-3 text-sm">
+              <div className="space-y-3 text-sm text-black">
                 <div>
-                  <div className="text-xs text-gray-500 uppercase tracking-[0.12em] mb-0.5">Entry</div>
-                  <div className="text-sm font-semibold text-gray-900">{fest.entryType}</div>
+                  <div className="text-xs uppercase tracking-[0.12em] mb-0.5">Entry</div>
+                  <div className="text-sm font-semibold text-black">{fest.entryType}</div>
                 </div>
                 {fest.duration && (
                   <div>
-                    <div className="text-xs text-gray-500 uppercase tracking-[0.12em] mb-0.5">Duration</div>
-                    <div className="text-sm font-semibold text-gray-900">{fest.duration}</div>
+                    <div className="text-xs uppercase tracking-[0.12em] mb-0.5">Duration</div>
+                    <div className="text-sm font-semibold text-black">{fest.duration}</div>
                     </div>
                 )}
                 {fest.expectedFootfall && (
                   <div>
-                    <div className="text-xs text-gray-500 uppercase tracking-[0.12em] mb-0.5">Expected footfall</div>
-                    <div className="text-sm font-semibold text-gray-900">{fest.expectedFootfall}</div>
+                    <div className="text-xs uppercase tracking-[0.12em] mb-0.5">Expected footfall</div>
+                    <div className="text-sm font-semibold text-black">{fest.expectedFootfall}</div>
                   </div>
                 )}
                 <div>
-                  <div className="text-xs text-gray-500 uppercase tracking-[0.12em] mb-0.5">Registrations</div>
-                  <div className="text-sm font-semibold text-gray-900">{fest.registrationsCount} people</div>
+                  <div className="text-xs uppercase tracking-[0.12em] mb-0.5">Registrations</div>
+                  <div className="text-sm font-semibold text-black">{fest.registrationsCount} people</div>
                 </div>
               </div>
             </div>
             
             {/* Organizer Card */}
             <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-              <h4 className="text-sm font-semibold mb-3 text-gray-900 uppercase tracking-[0.14em]">
+              <h4 className="text-sm font-semibold mb-3 text-black uppercase tracking-[0.14em]">
                 Contact organizer
               </h4>
               <div className="space-y-2.5 text-sm">
                 <div>
-                  <div className="font-semibold text-gray-900">{fest.organizer.name}</div>
-                  <div className="text-gray-600">{fest.organizer.role}</div>
-                  <div className="text-gray-600">{fest.organizer.college}</div>
+                  <div className="font-semibold text-black">{fest.organizer.name}</div>
+                  <div className="text-black">{fest.organizer.role}</div>
+                  <div className="text-black">{fest.organizer.college}</div>
                 </div>
                 {fest.organizer.email && (
                   <a
                     href={`mailto:${fest.organizer.email}`}
-                    className="flex items-center gap-2 text-gray-700 hover:text-black transition-colors"
+                    className="flex items-center gap-2 text-black hover:text-black transition-colors"
                   >
                   <Mail className="w-4 h-4" />
                     {fest.organizer.email}
@@ -327,7 +392,7 @@ export default function FestDetailPage() {
                 {fest.organizer.phone && (
                   <a
                     href={`tel:${fest.organizer.phone}`}
-                    className="flex items-center gap-2 text-gray-700 hover:text-black transition-colors"
+                    className="flex items-center gap-2 text-black hover:text-black transition-colors"
                   >
                   <Phone className="w-4 h-4" />
                     {fest.organizer.phone}
@@ -338,7 +403,7 @@ export default function FestDetailPage() {
                     href={`https://instagram.com/${fest.organizer.instagram.replace('@', '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-gray-700 hover:text-black transition-colors"
+                    className="flex items-center gap-2 text-black hover:text-black transition-colors"
                 >
                   <Instagram className="w-4 h-4" />
                     {fest.organizer.instagram}
@@ -349,7 +414,7 @@ export default function FestDetailPage() {
                     href={`https://linkedin.com/in/${fest.organizer.linkedin}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-gray-700 hover:text-black transition-colors"
+                    className="flex items-center gap-2 text-black hover:text-black transition-colors"
                 >
                   <Linkedin className="w-4 h-4" />
                     LinkedIn Profile
@@ -364,11 +429,11 @@ export default function FestDetailPage() {
                 <h4 className="text-lg font-semibold mb-4 text-black">Resources</h4>
                 <div className="space-y-3">
                   {fest.website && (
-              <a
+                    <a
                       href={fest.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-all group text-gray-800"
+                      className="flex items-center justify-between p-3 bg-gray-50 hover:bg-blue-50 rounded-lg transition-all group text-blue-600 hover:text-blue-700"
                     >
                       <div className="flex items-center gap-2">
                         <ExternalLink className="w-4 h-4" />
@@ -380,10 +445,10 @@ export default function FestDetailPage() {
                   {fest.brochure && (
                     <a
                       href={fest.brochure}
-                target="_blank"
-                rel="noopener noreferrer"
-                      className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-all group text-gray-800"
-              >
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-3 bg-gray-50 hover:bg-blue-50 rounded-lg transition-all group text-blue-600 hover:text-blue-700"
+                    >
                       <div className="flex items-center gap-2">
                         <Download className="w-4 h-4" />
                         <span className="text-sm font-medium">Download Brochure</span>
