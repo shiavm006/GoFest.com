@@ -24,6 +24,7 @@ export interface AuthResponse {
     email: string;
     role: string;
     college?: string;
+    bio?: string;
   };
 }
 
@@ -61,6 +62,54 @@ export async function signIn(data: SignInData): Promise<AuthResponse> {
   return response.json();
 }
 
+export async function updateMe(data: {
+  name?: string;
+  phone?: string | null;
+  college?: string | null;
+  bio?: string;
+}): Promise<MeResponse> {
+  const token = getAuthToken();
+
+  if (!token) {
+    throw new Error("Authentication required");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || "Failed to update profile");
+  }
+
+  return response.json();
+}
+export async function fetchMe(): Promise<MeResponse> {
+  const token = getAuthToken();
+
+  if (!token) {
+    throw new Error("Authentication required");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch profile");
+  }
+
+  return response.json();
+}
+
 export function setAuthToken(token: string) {
   if (typeof window !== "undefined") {
     localStorage.setItem("auth_token", token);
@@ -78,6 +127,17 @@ export function removeAuthToken() {
   if (typeof window !== "undefined") {
     localStorage.removeItem("auth_token");
   }
+}
+
+export interface MeResponse {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  role: string;
+  college: string | null;
+  bio: string;
+  is_active: boolean;
 }
 
 // Fest API Types

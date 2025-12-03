@@ -5,7 +5,7 @@ import { useImageUpload } from "@/components/hooks/use-image-upload";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useId } from "react";
 import { useRouter } from "next/navigation";
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, updateMe } from "@/lib/api";
 import {
   Dialog,
   DialogClose,
@@ -84,7 +84,7 @@ function Avatar({ defaultImage }: { defaultImage?: string }) {
   const currentImage = previewUrl || defaultImage;
 
   return (
-    <div className="-mt-10 px-6">
+    <div className="-mt-10 flex justify-center">
       <div className="relative flex size-20 items-center justify-center overflow-hidden rounded-full border-4 border-background bg-muted shadow-sm shadow-black/10">
         {currentImage && (
           <img
@@ -125,6 +125,7 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
     email: string;
     phone: string | null;
     college: string | null;
+    bio: string;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -164,13 +165,41 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
     maxLength: limit,
   } = useCharacterLimit({
     maxLength,
-    initialValue: "Hey there! I'm a student passionate about college fests and events.",
+    initialValue: userData?.bio ?? "Hey there! I'm a student passionate about college fests and events.",
   });
 
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
     router.push('/');
     window.location.reload();
+  };
+
+  const handleSave = async () => {
+    if (!userData) return;
+
+    try {
+      const updated = await updateMe({
+        college: userData.college,
+        bio: value,
+      });
+
+      setUserData((prev) =>
+        prev
+          ? {
+              ...prev,
+              college: updated.college,
+              bio: updated.bio,
+            }
+          : prev
+      );
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to update profile. Please try again."
+      );
+    }
   };
 
   return (
@@ -188,7 +217,7 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
           Make changes to your profile here. You can change your photo and set a username.
         </DialogDescription>
         <div className="overflow-y-auto">
-          <div className="h-20 bg-gradient-to-br from-[#2D5BFF] to-[#4F46E5]"></div>
+          <div className="h-20 bg-white"></div>
           <Avatar defaultImage="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop" />
           <div className="px-6 pb-6 pt-4">
             <form className="space-y-4">
@@ -204,7 +233,8 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
                       value={userData?.name || ''}
                       type="text"
                       disabled
-                      className="bg-gray-50 border-gray-200 text-black opacity-60 cursor-not-allowed"
+                      className="bg-white border-gray-200 text-black cursor-not-allowed"
+                      wrapperClassName="bg-white"
                     />
                   </div>
                   <div className="space-y-2">
@@ -215,7 +245,8 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
                       value={userData?.email || ''}
                       type="email"
                       disabled
-                      className="bg-gray-50 border-gray-200 text-black opacity-60 cursor-not-allowed"
+                      className="bg-white border-gray-200 text-black cursor-not-allowed"
+                      wrapperClassName="bg-white"
                     />
                   </div>
                   <div className="space-y-2">
@@ -226,7 +257,8 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
                       value={userData?.phone || ''}
                       type="tel"
                       disabled
-                      className="bg-gray-50 border-gray-200 text-black opacity-60 cursor-not-allowed"
+                      className="bg-white border-gray-200 text-black cursor-not-allowed"
+                      wrapperClassName="bg-white"
                     />
                   </div>
               <div className="space-y-2">
@@ -236,7 +268,12 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
                   placeholder="e.g., IIT Delhi, BITS Pilani"
                   value={userData?.college || ''}
                   type="text"
-                  className="bg-gray-50 border-gray-200 text-black"
+                  className="bg-white border-gray-200 text-black"
+                  onChange={(val) =>
+                    setUserData((prev) =>
+                      prev ? { ...prev, college: val } : prev
+                    )
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -276,12 +313,22 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
             </Button>
             <div className="flex gap-2">
               <DialogClose asChild>
-                <Button type="button" variant="outline" className="bg-gray-50 border-gray-200 text-white hover:bg-white/10">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="bg-white border-blue-600 text-blue-600 hover:bg-blue-50 hover:border-blue-700"
+                >
                   Cancel
                 </Button>
               </DialogClose>
               <DialogClose asChild>
-                <Button type="button" className="bg-blue-600 hover:bg-blue-700 text-white">Save changes</Button>
+                <Button
+                  type="button"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={handleSave}
+                >
+                  Save changes
+                </Button>
               </DialogClose>
             </div>
           </div>

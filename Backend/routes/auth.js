@@ -139,8 +139,46 @@ router.get("/me", authenticate, async (req, res) => {
     phone: req.user.phone,
     role: req.user.role,
     college: req.user.college,
+    bio: req.user.bio,
     is_active: req.user.isActive
   });
+});
+
+router.put("/me", authenticate, async (req, res, next) => {
+  try {
+    const { name, phone, college, bio } = req.body;
+
+    if (typeof name === "string" && name.trim()) {
+      req.user.name = name.trim();
+    }
+
+    if (typeof phone === "string") {
+      req.user.phone = phone.trim() || null;
+    }
+
+    if (typeof college === "string") {
+      req.user.college = college.trim() || null;
+    }
+
+    if (typeof bio === "string") {
+      req.user.bio = bio.trim();
+    }
+
+    await req.user.save();
+
+    res.json({
+      id: req.user._id.toString(),
+      name: req.user.name,
+      email: req.user.email,
+      phone: req.user.phone,
+      role: req.user.role,
+      college: req.user.college,
+      bio: req.user.bio,
+      is_active: req.user.isActive
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 export default router;
