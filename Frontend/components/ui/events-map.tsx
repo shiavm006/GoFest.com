@@ -7,7 +7,6 @@ import "leaflet/dist/leaflet.css";
 import type { Fest } from "@/lib/api";
 import { API_BASE_URL } from "@/lib/api";
 
-// Create custom red marker icon using SVG
 const createRedMarkerIcon = () => {
   return L.divIcon({
     className: 'custom-red-marker',
@@ -40,7 +39,6 @@ interface EventsMapProps {
   onFestClick: (fest: Fest) => void;
 }
 
-// Component to handle map view updates when selectedFest changes
 function MapController({ selectedFest }: { selectedFest: Fest | null }) {
   const map = useMap();
 
@@ -54,23 +52,18 @@ function MapController({ selectedFest }: { selectedFest: Fest | null }) {
   return null;
 }
 
-// Geocoding cache to avoid repeated API calls
 const geocodeCache = new Map<string, [number, number]>();
 
-// Geocode address to coordinates
 async function geocodeAddress(fest: Fest): Promise<[number, number] | null> {
   if (!fest.location?.city || !fest.location?.state) return null;
 
-  // Create cache key
   const cacheKey = `${fest.location.city}, ${fest.location.state}, India`;
   
-  // Check cache first
   if (geocodeCache.has(cacheKey)) {
     return geocodeCache.get(cacheKey)!;
   }
 
   try {
-    // Try backend API first (if available)
     const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
     if (token) {
       try {
@@ -93,12 +86,10 @@ async function geocodeAddress(fest: Fest): Promise<[number, number] | null> {
           }
         }
       } catch (error) {
-        // Fall back to Nominatim if backend fails
         console.log('Backend geocoding failed, using Nominatim');
       }
     }
 
-    // Fallback to Nominatim (OpenStreetMap geocoding)
     const address = `${fest.location.city}, ${fest.location.state}, India`;
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&countrycodes=in`,
@@ -134,7 +125,6 @@ export default function EventsMap({ fests, selectedFest, onFestClick }: EventsMa
     setMounted(true);
   }, []);
 
-  // Process fests and geocode if needed
   useEffect(() => {
     const processFests = async () => {
       if (fests.length === 0) {
@@ -146,7 +136,6 @@ export default function EventsMap({ fests, selectedFest, onFestClick }: EventsMa
       const processed: Fest[] = [];
       let needsGeocoding = 0;
 
-      // First pass: collect fests with coordinates and identify those needing geocoding
       const festsToGeocode: Fest[] = [];
       
       for (const fest of fests) {
@@ -156,10 +145,8 @@ export default function EventsMap({ fests, selectedFest, onFestClick }: EventsMa
           fest.location.coordinates[0] !== 0 &&
           fest.location.coordinates[1] !== 0
         ) {
-          // Fest already has valid coordinates
           processed.push(fest);
         } else if (fest.location?.city && fest.location?.state) {
-          // Fest needs geocoding
           festsToGeocode.push(fest);
           needsGeocoding++;
         }
@@ -167,7 +154,6 @@ export default function EventsMap({ fests, selectedFest, onFestClick }: EventsMa
 
       setGeocodingProgress({ current: 0, total: needsGeocoding });
 
-      // Second pass: geocode fests that need it
       for (let i = 0; i < festsToGeocode.length; i++) {
         const fest = festsToGeocode[i];
         const coords = await geocodeAddress(fest);
@@ -184,7 +170,6 @@ export default function EventsMap({ fests, selectedFest, onFestClick }: EventsMa
           });
         }
         
-        // Small delay to avoid rate limiting
         if (i < festsToGeocode.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 200));
         }
@@ -198,10 +183,8 @@ export default function EventsMap({ fests, selectedFest, onFestClick }: EventsMa
     processFests();
   }, [fests]);
 
-  // Default center (New Delhi) if no fests with coordinates
   const defaultCenter: [number, number] = [28.6139, 77.2090];
   
-  // Calculate center based on fests if available
   const getCenter = (): [number, number] => {
     if (festsWithCoords.length === 0) return defaultCenter;
     
@@ -250,7 +233,6 @@ export default function EventsMap({ fests, selectedFest, onFestClick }: EventsMa
     );
   }
 
-  // Additional safety check for fests with coordinates
   if (festsWithCoords.length === 0) {
     return (
       <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">

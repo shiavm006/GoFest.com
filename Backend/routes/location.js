@@ -3,10 +3,8 @@ import { authenticate } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Rate limiting map (simple in-memory, use Redis in real production)
 const rateLimitMap = new Map();
 
-// Clean up old entries every hour
 setInterval(() => {
   const oneHourAgo = Date.now() - 3600000;
   for (const [key, value] of rateLimitMap.entries()) {
@@ -16,7 +14,6 @@ setInterval(() => {
   }
 }, 3600000);
 
-// Rate limiter middleware
 const locationRateLimit = (req, res, next) => {
   const identifier = req.user?._id || req.ip;
   const now = Date.now();
@@ -25,7 +22,6 @@ const locationRateLimit = (req, res, next) => {
   if (userLimit) {
     const timeSinceLastRequest = now - userLimit.timestamp;
     
-    // Allow 1 request per 2 seconds per user
     if (timeSinceLastRequest < 2000) {
       return res.status(429).json({
         detail: "Too many requests. Please wait a moment."
@@ -37,7 +33,6 @@ const locationRateLimit = (req, res, next) => {
   next();
 };
 
-// Reverse geocode endpoint (proxies to Nominatim with caching)
 router.get("/reverse-geocode", authenticate, locationRateLimit, async (req, res, next) => {
   try {
     const { lat, lon } = req.query;
@@ -46,7 +41,6 @@ router.get("/reverse-geocode", authenticate, locationRateLimit, async (req, res,
       return res.status(400).json({ detail: "Latitude and longitude are required" });
     }
 
-    // Validate coordinates
     const latitude = parseFloat(lat);
     const longitude = parseFloat(lon);
 
@@ -56,7 +50,6 @@ router.get("/reverse-geocode", authenticate, locationRateLimit, async (req, res,
       return res.status(400).json({ detail: "Invalid coordinates" });
     }
 
-    // Call Nominatim API with proper headers and error handling
     const response = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`,
       {
@@ -64,7 +57,7 @@ router.get("/reverse-geocode", authenticate, locationRateLimit, async (req, res,
           'User-Agent': 'GoFest.com College Fest Platform',
           'Accept-Language': 'en'
         },
-        signal: AbortSignal.timeout(5000) // 5 second timeout
+        signal: AbortSignal.timeout(5000)
       }
     );
 
@@ -80,7 +73,6 @@ router.get("/reverse-geocode", authenticate, locationRateLimit, async (req, res,
       });
     }
 
-    // Return structured, clean data
     res.json({
       location: {
         city: data.address.city || 
@@ -112,7 +104,6 @@ router.get("/reverse-geocode", authenticate, locationRateLimit, async (req, res,
   }
 });
 
-// Search location by name (for autocomplete - future feature)
 router.get("/search", authenticate, locationRateLimit, async (req, res, next) => {
   try {
     const { query } = req.query;

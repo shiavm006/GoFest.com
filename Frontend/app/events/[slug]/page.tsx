@@ -52,7 +52,6 @@ export default function FestDetailPage() {
     loadFest();
   }, [slug]);
 
-  // Check if user is already registered for this fest
   useEffect(() => {
     async function checkRegistration() {
       if (!fest) return;
@@ -67,7 +66,6 @@ export default function FestDetailPage() {
           setRegistrationSuccess(true);
         }
       } catch (err) {
-        // silently ignore – registration info is just for UX
         console.error("Failed to check registration status:", err);
     }
     }
@@ -134,18 +132,15 @@ export default function FestDetailPage() {
     );
   }
 
-  // Generate Google Maps URL for navigation
   const googleMapsUrl = (() => {
     const loc = fest.location;
     if (!loc) return "#";
 
-    // Best: use exact coordinates if available
     if (loc.coordinates && loc.coordinates.length === 2) {
       const [lng, lat] = loc.coordinates;
       return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
     }
 
-    // Fallback: use text address / city / state
     const parts = [
       loc.address || "",
       loc.city || "",
