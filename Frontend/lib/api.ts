@@ -318,3 +318,24 @@ export async function deleteFest(festId: string): Promise<void> {
   }
 }
 
+export async function getFestRegistrations(festId: string): Promise<Registration[]> {
+  const token = getAuthToken();
+  
+  if (!token) {
+    throw new Error("Authentication required");
+  }
+  
+  const response = await fetch(`${API_BASE_URL}/api/fests/${festId}/registrations`, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || "Failed to fetch registrations");
+  }
+
+  return response.json();
+}
+

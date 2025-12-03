@@ -456,7 +456,7 @@ export default function HostFestPage() {
                         {fest.registrationsCount ?? 0} registrations
                       </span>
                     </div>
-                    <div className="flex items-center justify-between text-xs text-gray-600">
+                    <div className="flex items-center justify-between text-xs text-gray-600 mb-4">
                       <span className="uppercase tracking-[0.18em] text-gray-500">
                         {fest.category}
                       </span>
@@ -464,6 +464,17 @@ export default function HostFestPage() {
                         Hosted • {new Date(fest.createdAt).toLocaleDateString()}
                       </span>
                     </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/host/registrations/${fest._id}`);
+                      }}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm"
+                    >
+                      <Users className="w-4 h-4" />
+                      View Registrations ({fest.registrationsCount ?? 0})
+                    </button>
                   </div>
                 ))}
               </div>
@@ -502,7 +513,7 @@ export default function HostFestPage() {
 
           <form onSubmit={handleSubmit} className="space-y-12">
               {/* Basic Information */}
-            <section className="space-y-4">
+            <section className="space-y-4 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8 rounded-xl shadow-lg">
               <div className="flex items-center gap-3 mb-6">
                 <Calendar className="w-6 h-6 text-white" />
                 <h2 className="text-2xl font-bold text-white">Basic Information</h2>
@@ -603,7 +614,7 @@ export default function HostFestPage() {
             </section>
 
             {/* Location */}
-            <section className="space-y-4">
+            <section className="space-y-4 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8 rounded-xl shadow-lg">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <MapPin className="w-6 h-6 text-white" />
@@ -653,7 +664,7 @@ export default function HostFestPage() {
             </section>
 
             {/* Organizer Details */}
-            <section className="space-y-4">
+            <section className="space-y-4 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8 rounded-xl shadow-lg">
               <div className="flex items-center gap-3 mb-6">
                 <Users className="w-6 h-6 text-white" />
                 <h2 className="text-2xl font-bold text-white">Organizer Details</h2>
@@ -722,7 +733,7 @@ export default function HostFestPage() {
             </section>
 
             {/* Images & Media */}
-            <section className="space-y-4">
+            <section className="space-y-4 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8 rounded-xl shadow-lg">
               <div className="flex items-center gap-3 mb-6">
                 <Image className="w-6 h-6 text-white" />
                 <h2 className="text-2xl font-bold text-white">Images & Media</h2>
@@ -771,7 +782,7 @@ export default function HostFestPage() {
             </section>
 
             {/* Pricing */}
-            <section className="space-y-4">
+            <section className="space-y-4 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8 rounded-xl shadow-lg">
               <div className="flex items-center gap-3 mb-6">
                 <IndianRupee className="w-6 h-6 text-white" />
                 <h2 className="text-2xl font-bold text-white">Entry & Pricing</h2>
@@ -811,7 +822,7 @@ export default function HostFestPage() {
             </section>
 
             {/* Events */}
-            <section className="space-y-4">
+            <section className="space-y-4 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8 rounded-xl shadow-lg">
               <div className="flex items-center gap-3 mb-6">
                 <Plus className="w-6 h-6 text-white" />
                 <h2 className="text-2xl font-bold text-white">Events</h2>
