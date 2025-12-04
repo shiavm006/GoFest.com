@@ -67,6 +67,7 @@ export async function updateMe(data: {
   phone?: string | null;
   college?: string | null;
   bio?: string;
+  avatar?: string | null;
 }): Promise<MeResponse> {
   const token = getAuthToken();
 
@@ -137,6 +138,7 @@ export interface MeResponse {
   role: string;
   college: string | null;
   bio: string;
+  avatar: string | null;
   is_active: boolean;
 }
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCharacterLimit } from "@/components/hooks/use-character-limit";
-import { useImageUpload } from "@/components/hooks/use-image-upload";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useId } from "react";
 import { useRouter } from "next/navigation";
@@ -19,107 +18,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, ImagePlus, X } from "lucide-react";
-
-function ProfileBg({ defaultImage }: { defaultImage?: string }) {
-  const [hideDefault, setHideDefault] = useState(false);
-  const { previewUrl, fileInputRef, handleThumbnailClick, handleFileChange, handleRemove } =
-    useImageUpload();
-
-  const currentImage = previewUrl || (!hideDefault ? defaultImage : null);
-
-  const handleImageRemove = () => {
-    handleRemove();
-    setHideDefault(true);
-  };
-
-  return (
-    <div className="h-32">
-      <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-muted">
-        {currentImage && (
-          <img
-            className="h-full w-full object-cover"
-            src={currentImage}
-            alt={previewUrl ? "Preview of uploaded image" : "Default profile background"}
-            width={512}
-            height={96}
-          />
-        )}
-        <div className="absolute inset-0 flex items-center justify-center gap-2">
-          <button
-            type="button"
-            className="z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-gray-900/70 text-white outline-offset-2 transition-colors hover:bg-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70"
-            onClick={handleThumbnailClick}
-            aria-label={currentImage ? "Change image" : "Upload image"}
-          >
-            <ImagePlus size={16} strokeWidth={2} aria-hidden="true" />
-          </button>
-          {currentImage && (
-            <button
-              type="button"
-              className="z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-gray-900/70 text-white outline-offset-2 transition-colors hover:bg-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70"
-              onClick={handleImageRemove}
-              aria-label="Remove image"
-            >
-              <X size={16} strokeWidth={2} aria-hidden="true" />
-            </button>
-          )}
-        </div>
-      </div>
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        className="hidden"
-        accept="image/*"
-        aria-label="Upload image file"
-      />
-    </div>
-  );
-}
-
-function Avatar({ defaultImage }: { defaultImage?: string }) {
-  const { previewUrl, fileInputRef, handleThumbnailClick, handleFileChange } = useImageUpload();
-
-  const currentImage = previewUrl || defaultImage;
-
-  return (
-    <div className="-mt-10 flex justify-center">
-      <div className="relative flex size-20 items-center justify-center overflow-hidden rounded-full border-4 border-background bg-muted shadow-sm shadow-black/10">
-        {currentImage && (
-          <img
-            src={currentImage}
-            className="h-full w-full object-cover"
-            width={80}
-            height={80}
-            alt="Profile image"
-          />
-        )}
-        <button
-          type="button"
-          className="absolute flex size-8 cursor-pointer items-center justify-center rounded-full bg-gray-900/70 text-white outline-offset-2 transition-colors hover:bg-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70"
-          onClick={handleThumbnailClick}
-          aria-label="Change profile picture"
-        >
-          <ImagePlus size={16} strokeWidth={2} aria-hidden="true" />
-        </button>
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          className="hidden"
-          accept="image/*"
-          aria-label="Upload profile picture"
-        />
-      </div>
-    </div>
-  );
-}
 
 export function ProfileDialog({ children }: { children: React.ReactNode }) {
   const id = useId();
   const router = useRouter();
   const maxLength = 180;
+  const [isOpen, setIsOpen] = useState(false);
   const [userData, setUserData] = useState<{
     name: string;
     email: string;
@@ -127,9 +31,11 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
     college: string | null;
     bio: string;
   } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     const fetchUserData = async () => {
       const token = localStorage.getItem('auth_token');
       if (!token) {
@@ -137,6 +43,7 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      setIsLoading(true);
       try {
         const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
           headers: {
@@ -156,17 +63,24 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
     };
 
     fetchUserData();
-  }, []);
+  }, [isOpen]);
 
   const {
     value,
     characterCount,
     handleChange,
     maxLength: limit,
+    setValue,
   } = useCharacterLimit({
     maxLength,
-    initialValue: userData?.bio ?? "Hey there! I'm a student passionate about college fests and events.",
+    initialValue: "",
   });
+
+  useEffect(() => {
+    if (userData?.bio !== undefined) {
+      setValue(userData.bio);
+    }
+  }, [userData?.bio]);
 
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
@@ -192,6 +106,7 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
             }
           : prev
       );
+      setIsOpen(false);
     } catch (error) {
       console.error("Failed to update profile:", error);
       alert(
@@ -202,8 +117,12 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+  };
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
@@ -217,9 +136,7 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
           Make changes to your profile here. You can change your photo and set a username.
         </DialogDescription>
         <div className="overflow-y-auto">
-          <div className="h-20 bg-white"></div>
-          <Avatar defaultImage="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop" />
-          <div className="px-6 pb-6 pt-4">
+          <div className="px-6 pb-6 pt-6">
             <form className="space-y-4">
               {isLoading ? (
                 <div className="text-gray-500 text-center py-4">Loading profile...</div>
@@ -321,15 +238,13 @@ export function ProfileDialog({ children }: { children: React.ReactNode }) {
                   Cancel
                 </Button>
               </DialogClose>
-              <DialogClose asChild>
-                <Button
-                  type="button"
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                  onClick={handleSave}
-                >
-                  Save changes
-                </Button>
-              </DialogClose>
+              <Button
+                type="button"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={handleSave}
+              >
+                Save changes
+              </Button>
             </div>
           </div>
         </DialogFooter>

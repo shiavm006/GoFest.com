@@ -140,13 +140,14 @@ router.get("/me", authenticate, async (req, res) => {
     role: req.user.role,
     college: req.user.college,
     bio: req.user.bio,
+    avatar: req.user.avatar,
     is_active: req.user.isActive
   });
 });
 
 router.put("/me", authenticate, async (req, res, next) => {
   try {
-    const { name, phone, college, bio } = req.body;
+    const { name, phone, college, bio, avatar } = req.body;
 
     if (typeof name === "string" && name.trim()) {
       req.user.name = name.trim();
@@ -164,6 +165,10 @@ router.put("/me", authenticate, async (req, res, next) => {
       req.user.bio = bio.trim();
     }
 
+    if (typeof avatar === "string") {
+      req.user.avatar = avatar.trim() || null;
+    }
+
     await req.user.save();
 
     res.json({
@@ -174,6 +179,7 @@ router.put("/me", authenticate, async (req, res, next) => {
       role: req.user.role,
       college: req.user.college,
       bio: req.user.bio,
+      avatar: req.user.avatar,
       is_active: req.user.isActive
     });
   } catch (error) {

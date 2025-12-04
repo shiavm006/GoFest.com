@@ -209,7 +209,7 @@ export default function FestDetailPage() {
 
       {/* 2. Quick Info Bar */}
       <section className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-200">
-        <div className="px-6 lg:px-16 py-4 flex flex-wrap justify-between items-center gap-4">
+        <div className="px-6 lg:px-16 py-6 flex flex-wrap justify-between items-center gap-4">
           <div>
             <h2 className="text-xl font-semibold text-black">{fest.title}</h2>
             <p className="text-sm text-black">{fest.college}</p>

@@ -10,11 +10,15 @@ type UseCharacterLimitProps = {
 export function useCharacterLimit({ maxLength, initialValue = "" }: UseCharacterLimitProps) {
   const [value, setValue] = useState(initialValue);
   const [characterCount, setCharacterCount] = useState(initialValue.length);
+  const [hasBeenSet, setHasBeenSet] = useState(false);
 
   useEffect(() => {
-    setValue(initialValue);
-    setCharacterCount(initialValue.length);
-  }, [initialValue, maxLength]);
+    if (!hasBeenSet && initialValue) {
+      setValue(initialValue);
+      setCharacterCount(initialValue.length);
+      setHasBeenSet(true);
+    }
+  }, [initialValue, hasBeenSet]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const newValue = e.target.value;
@@ -24,11 +28,19 @@ export function useCharacterLimit({ maxLength, initialValue = "" }: UseCharacter
     }
   };
 
+  const setValueWithCount = (newValue: string) => {
+    const trimmedValue = newValue.length <= maxLength ? newValue : newValue.slice(0, maxLength);
+    setValue(trimmedValue);
+    setCharacterCount(trimmedValue.length);
+    setHasBeenSet(true);
+  };
+
   return {
     value,
     characterCount,
     handleChange,
     maxLength,
+    setValue: setValueWithCount,
   };
 }
 
