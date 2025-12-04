@@ -288,7 +288,7 @@ export default function HostFestPage() {
           Gofest.com
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-6">
           <nav className="hidden md:flex gap-6 text-base">
             <Link href="/" className="text-black hover:text-gray-800 transition-colors pb-1 hover:border-b-2 hover:border-black" style={{ fontFamily: 'var(--font-audiowide)' }}>
               Home
@@ -298,6 +298,9 @@ export default function HostFestPage() {
             </Link>
             <Link href="/host" className="text-black hover:text-gray-800 transition-colors pb-1 hover:border-b-2 hover:border-black" style={{ fontFamily: 'var(--font-audiowide)' }}>
               Host
+            </Link>
+            <Link href="/contact" className="text-black hover:text-gray-800 transition-colors pb-1 hover:border-b-2 hover:border-black" style={{ fontFamily: 'var(--font-audiowide)' }}>
+              About Us
             </Link>
             {!isLoggedIn && (
               <Link href="/login" className="text-black hover:text-gray-800 transition-colors pb-1 hover:border-b-2 hover:border-black" style={{ fontFamily: 'var(--font-audiowide)' }}>
