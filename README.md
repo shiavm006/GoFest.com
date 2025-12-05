@@ -10,17 +10,35 @@ A comprehensive platform connecting college students with fest organizers across
 
 ---
 
-## Table of Contents
+## Tech Stack Used
 
-1. [Product Design Requirements](#1-product-design-requirements)
-2. [Tech Stack](#2-tech-stack)
-3. [App Flowchart](#3-app-flowchart)
-4. [Project Rules](#4-project-rules)
-5. [Implementation Plan](#5-implementation-plan)
-6. [Frontend Guidelines](#6-frontend-guidelines)
-7. [Backend Guidelines](#7-backend-guidelines)
-8. [Optimised React Code Guidelines](#8-optimised-react-code-guidelines)
-9. [Security Checklist](#9-security-checklist)
+### Frontend
+- **Next.js 16.0.7** - React framework with SSR
+- **React 19.2.1** - UI library
+- **TypeScript 5** - Type safety
+- **Tailwind CSS 4.0** - Utility-first CSS
+- **Framer Motion 12.23.24** - Animation library
+- **Radix UI** - Accessible component primitives
+- **Lucide React** - Icon library
+- **Leaflet 1.9.4** - Interactive maps
+- **React Leaflet 5.0.0** - React wrapper for Leaflet
+- **Cloudinary 2.8.0** - Media management
+
+### Backend
+- **Node.js** - JavaScript runtime
+- **Express.js 4.18.2** - Web framework
+- **MongoDB 8.0.3** - NoSQL database
+- **Mongoose 8.0.3** - MongoDB ODM
+- **jsonwebtoken 9.0.2** - JWT authentication
+- **bcryptjs 2.4.3** - Password hashing
+- **@sendgrid/mail 8.1.6** - Email service
+- **dotenv 16.3.1** - Environment variables
+- **cors 2.8.5** - CORS middleware
+
+### Deployment
+- **Vercel** - Frontend hosting
+- **Render** - Backend hosting
+- **MongoDB Atlas** - Database hosting
 
 ---
 
@@ -134,32 +152,7 @@ User Browser (Next.js) → Express.js Backend → MongoDB
 
 ---
 
-## 5. Implementation Plan
-
-### Phase 1: Foundation ✅
-- Project setup, authentication system
-
-### Phase 2: Core Features ✅
-- Fest management, registration system
-
-### Phase 3: Enhanced Features ✅
-- Search, sorting, maps, media management
-
-### Phase 4: Email Integration ✅
-- SendGrid setup, email templates
-
-### Phase 5: Organizer Dashboard ✅
-- Registration viewing, CSV export
-
-### Phase 6: UI/UX Polish ✅
-- Responsive design, animations, accessibility
-
-### Phase 7: Testing & Deployment
-- Unit tests, integration tests, production deployment
-
----
-
-## 6. Frontend Guidelines
+## 5. Frontend Guidelines
 
 ### Design Principles
 - **Minimalism**: Clean, uncluttered interfaces
@@ -188,7 +181,7 @@ components/
 
 ---
 
-## 7. Backend Guidelines
+## 6. Backend Guidelines
 
 ### API Design
 ```
@@ -223,7 +216,7 @@ app.use((err, req, res, next) => {
 
 ---
 
-## 8. Optimised React Code Guidelines
+## 7. Optimised React Code Guidelines
 
 ### ❌ Problem: Inline Objects/Functions
 ```tsx
@@ -248,56 +241,6 @@ const mapStyle = useMemo(() => ({ width: '100%' }), []);
 - Avoid unnecessary state - use computed values
 - Batch state updates when possible
 - Use Context API for global state (theme, auth)
-
----
-
-## 9. Security Checklist
-
-### ✅ 9.1 Authentication
-- JWT tokens with expiration
-- Password hashing with bcrypt (10 rounds)
-- **Recommendation**: Consider Clerk/Auth0 for production (MFA, sessions)
-
-### ✅ 9.2 Protected Endpoints
-- All protected routes use `authenticate` middleware
-- Verify user permissions (e.g., fest ownership)
-
-### ✅ 9.3 Secrets Management
-- All secrets in `.env` files
-- `.env` in `.gitignore`
-- Only `NEXT_PUBLIC_*` vars exposed to client
-
-### ✅ 9.4 Error Messages
-- Generic messages to clients
-- Detailed errors logged server-side only
-- Never expose stack traces
-
-### ✅ 9.5 Middleware Auth
-- JWT verification on every protected route
-- User validation and active status check
-
-### ⚠️ 9.6 Role-Based Access Control
-- Basic roles implemented (`student`, `organizer`, `admin`)
-- **Recommendation**: Add comprehensive RBAC middleware
-
-### ✅ 9.7 Secure Database
-- Mongoose ODM (prevents NoSQL injection)
-- Schema validation
-- Use MongoDB Atlas with encryption
-
-### ✅ 9.8 Secure Hosting
-- **Frontend**: Vercel (HTTPS, DDoS protection, WAF)
-- **Backend**: Render (HTTPS, managed infrastructure)
-- **Database**: MongoDB Atlas (encryption, backups)
-
-### ⚠️ 9.9 HTTPS Enforcement
-- Vercel provides automatic HTTPS
-- **Recommendation**: Add HTTPS redirect in backend
-
-### ✅ 9.10 File Upload Security
-- File type validation
-- Size limits (5MB)
-- Cloudinary handles malware scanning
 
 ---
 
@@ -345,22 +288,6 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
 NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=your_upload_preset
 ```
-
----
-
-## Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
-
----
-
-## License
-
-This project is proprietary and confidential.
 
 ---
 
