@@ -13,49 +13,80 @@ export async function sendRegistrationEmail(registration) {
   const subject = `Registration confirmed for ${fest.title}`;
 
   const html = `
-    <div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #111827;">
-      <div style="max-width: 640px; margin: 0 auto; padding: 24px;">
-        <div style="border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb;">
-          <div style="background: linear-gradient(135deg, #2563eb, #4f46e5); padding: 20px 24px; color: white;">
-            <h1 style="margin: 0; font-size: 20px; font-weight: 600;">Your registration is confirmed 🎉</h1>
-            <p style="margin: 4px 0 0; font-size: 14px; opacity: 0.9;">
-              Thank you for registering for ${fest.title}.
-            </p>
-          </div>
-          <div style="padding: 20px 24px; background-color: #ffffff;">
-            <p style="margin-top: 0;">Hi ${user.name || "there"},</p>
-            <p>
-              You have successfully registered for
-              <strong>${fest.title}</strong> hosted by
-              <strong>${fest.college}</strong>.
-            </p>
-            <div style="margin: 16px 0; padding: 12px 14px; background-color: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb; font-size: 14px;">
-              <p style="margin: 0 0 6px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: #6b7280;">
-                Event details
-              </p>
-              <p style="margin: 0;"><strong>📅 Date:</strong> ${fest.date}</p>
-              <p style="margin: 0;"><strong>📍 Location:</strong> ${fest.location?.city}, ${fest.location?.state}</p>
-              <p style="margin: 0;"><strong>🏷️ Entry:</strong> ${
-                fest.entryType === "Paid" ? `Paid (₹${fest.entryFee || 0})` : "Free"
-              }</p>
-            </div>
-            <p style="margin: 16px 0 0; font-size: 13px; color: #6b7280;">
-              Registration ID:
-              <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">
-                ${registration._id}
-              </span>
-            </p>
-            <p style="margin: 16px 0 0;">
-              We’re excited to see you at the fest! If you have any questions, you can reach out to the organizer at
-              <strong>${fest.organizer?.email || "their listed contact"}</strong>.
-            </p>
-          </div>
-          <div style="padding: 12px 24px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; text-align: center; font-size: 12px; color: #9ca3af;">
-            <p style="margin: 0;">Sent by GoFest.com</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f5f5f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f7; padding: 48px 16px;">
+        <tr>
+          <td align="center">
+            <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);">
+              <tr>
+                <td style="padding: 48px 40px 40px;">
+                  <div style="margin-bottom: 32px;">
+                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                      <span style="font-size: 24px;">✓</span>
+                    </div>
+                    <h1 style="margin: 0 0 8px; font-size: 28px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.5px; line-height: 1.2;">Registration Confirmed</h1>
+                    <p style="margin: 0; font-size: 17px; color: #86868b; line-height: 1.5;">Thank you for registering for ${fest.title}</p>
+                  </div>
+                  
+                  <div style="margin-bottom: 40px;">
+                    <p style="margin: 0 0 24px; font-size: 17px; color: #1d1d1f; line-height: 1.6;">Hi ${user.name || "there"},</p>
+                    <p style="margin: 0 0 24px; font-size: 17px; color: #1d1d1f; line-height: 1.6;">
+                      You're all set! Your registration for <strong style="color: #1d1d1f; font-weight: 600;">${fest.title}</strong> at <strong style="color: #1d1d1f; font-weight: 600;">${fest.college}</strong> has been confirmed.
+                    </p>
+                  </div>
+
+                  <div style="background-color: #f5f5f7; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding-bottom: 16px; border-bottom: 1px solid #e5e5e7;">
+                          <div style="font-size: 13px; font-weight: 600; color: #86868b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Date</div>
+                          <div style="font-size: 17px; color: #1d1d1f; font-weight: 500;">${fest.date}</div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 16px 0; border-bottom: 1px solid #e5e5e7;">
+                          <div style="font-size: 13px; font-weight: 600; color: #86868b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Location</div>
+                          <div style="font-size: 17px; color: #1d1d1f; font-weight: 500;">${fest.location?.city}, ${fest.location?.state}</div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding-top: 16px;">
+                          <div style="font-size: 13px; font-weight: 600; color: #86868b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Entry</div>
+                          <div style="font-size: 17px; color: #1d1d1f; font-weight: 500;">${
+                            fest.entryType === "Paid" ? `₹${fest.entryFee || 0}` : "Free"
+                          }</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+
+                  <div style="padding: 16px; background-color: #f5f5f7; border-radius: 8px; margin-bottom: 32px;">
+                    <div style="font-size: 13px; color: #86868b; margin-bottom: 4px;">Registration ID</div>
+                    <div style="font-family: 'SF Mono', 'Monaco', 'Menlo', monospace; font-size: 13px; color: #1d1d1f; font-weight: 500;">${registration._id}</div>
+                  </div>
+
+                  <p style="margin: 0; font-size: 15px; color: #86868b; line-height: 1.6;">
+                    Questions? Contact the organizer at <a href="mailto:${fest.organizer?.email || ''}" style="color: #007AFF; text-decoration: none;">${fest.organizer?.email || "their listed contact"}</a>
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 24px 40px; background-color: #f5f5f7; border-top: 1px solid #e5e5e7;">
+                  <p style="margin: 0; font-size: 13px; color: #86868b; text-align: center;">GoFest.com</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
   `;
 
   try {
@@ -86,35 +117,76 @@ export async function sendOrganizerNotification(registration) {
   const subject = `New registration for ${fest.title}`;
 
   const html = `
-    <div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #111827;">
-      <div style="max-width: 640px; margin: 0 auto; padding: 24px;">
-        <div style="border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb;">
-          <div style="background-color: #111827; padding: 18px 24px; color: white;">
-            <h1 style="margin: 0; font-size: 18px; font-weight: 600;">New registration received</h1>
-          </div>
-          <div style="padding: 20px 24px; background-color: #ffffff; font-size: 14px;">
-            <p style="margin-top: 0;">Hi ${fest.organizer?.name || "Organizer"},</p>
-            <p>
-              A new participant has registered for <strong>${fest.title}</strong>.
-            </p>
-            <div style="margin: 16px 0; padding: 12px 14px; background-color: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
-              <p style="margin: 0 0 6px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: #6b7280;">
-                Participant
-              </p>
-              <p style="margin: 0;"><strong>Name:</strong> ${user.name}</p>
-              <p style="margin: 0;"><strong>Email:</strong> ${user.email}</p>
-              ${user.college ? `<p style="margin: 0;"><strong>College:</strong> ${user.college}</p>` : ""}
-            </div>
-            <p style="margin: 16px 0 0; font-size: 13px; color: #6b7280;">
-              Total registrations count in the dashboard may take a short time to update.
-            </p>
-          </div>
-          <div style="padding: 12px 24px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; text-align: center; font-size: 12px; color: #9ca3af;">
-            <p style="margin: 0;">GoFest.com organizer notification</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f5f5f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f7; padding: 48px 16px;">
+        <tr>
+          <td align="center">
+            <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);">
+              <tr>
+                <td style="padding: 48px 40px 40px;">
+                  <div style="margin-bottom: 32px;">
+                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #34C759 0%, #30D158 100%); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                      <span style="font-size: 24px; color: #ffffff;">+</span>
+                    </div>
+                    <h1 style="margin: 0 0 8px; font-size: 28px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.5px; line-height: 1.2;">New Registration</h1>
+                    <p style="margin: 0; font-size: 17px; color: #86868b; line-height: 1.5;">Someone just registered for ${fest.title}</p>
+                  </div>
+                  
+                  <div style="margin-bottom: 40px;">
+                    <p style="margin: 0 0 24px; font-size: 17px; color: #1d1d1f; line-height: 1.6;">Hi ${fest.organizer?.name || "Organizer"},</p>
+                    <p style="margin: 0 0 24px; font-size: 17px; color: #1d1d1f; line-height: 1.6;">
+                      A new participant has registered for <strong style="color: #1d1d1f; font-weight: 600;">${fest.title}</strong>.
+                    </p>
+                  </div>
+
+                  <div style="background-color: #f5f5f7; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
+                    <div style="font-size: 13px; font-weight: 600; color: #86868b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 20px;">Participant Details</div>
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding-bottom: 16px; border-bottom: 1px solid #e5e5e7;">
+                          <div style="font-size: 13px; font-weight: 600; color: #86868b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Name</div>
+                          <div style="font-size: 17px; color: #1d1d1f; font-weight: 500;">${user.name}</div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 16px 0; ${user.college ? 'border-bottom: 1px solid #e5e5e7;' : ''}">
+                          <div style="font-size: 13px; font-weight: 600; color: #86868b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Email</div>
+                          <div style="font-size: 17px; color: #1d1d1f; font-weight: 500;"><a href="mailto:${user.email}" style="color: #007AFF; text-decoration: none;">${user.email}</a></div>
+                        </td>
+                      </tr>
+                      ${user.college ? `
+                      <tr>
+                        <td style="padding-top: 16px;">
+                          <div style="font-size: 13px; font-weight: 600; color: #86868b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">College</div>
+                          <div style="font-size: 17px; color: #1d1d1f; font-weight: 500;">${user.college}</div>
+                        </td>
+                      </tr>
+                      ` : ''}
+                    </table>
+                  </div>
+
+                  <p style="margin: 0; font-size: 15px; color: #86868b; line-height: 1.6;">
+                    View all registrations in your dashboard. The count may take a moment to update.
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 24px 40px; background-color: #f5f5f7; border-top: 1px solid #e5e5e7;">
+                  <p style="margin: 0; font-size: 13px; color: #86868b; text-align: center;">GoFest.com</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
   `;
 
   try {

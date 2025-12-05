@@ -219,12 +219,14 @@ export async function fetchFests(params?: {
   limit?: number;
   category?: string;
   search?: string;
+  sort?: string;
 }): Promise<FestsResponse> {
   const queryParams = new URLSearchParams();
   if (params?.skip !== undefined) queryParams.append('skip', params.skip.toString());
   if (params?.limit !== undefined) queryParams.append('limit', params.limit.toString());
   if (params?.category) queryParams.append('category', params.category);
   if (params?.search) queryParams.append('search', params.search);
+  if (params?.sort) queryParams.append('sort', params.sort);
 
   const response = await fetch(`${API_BASE_URL}/api/fests?${queryParams}`);
 

@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const { skip = 0, limit = 20, category, search } = req.query;
+    const { skip = 0, limit = 20, category, search, sort = 'newest' } = req.query;
     
     const query = { status: 'published' };
     
@@ -24,11 +24,32 @@ router.get("/", async (req, res, next) => {
       ];
     }
     
+    let sortOption = { createdAt: -1 };
+    switch (sort) {
+      case 'newest':
+        sortOption = { createdAt: -1 };
+        break;
+      case 'oldest':
+        sortOption = { createdAt: 1 };
+        break;
+      case 'title_asc':
+        sortOption = { title: 1 };
+        break;
+      case 'title_desc':
+        sortOption = { title: -1 };
+        break;
+      case 'registrations':
+        sortOption = { registrationsCount: -1 };
+        break;
+      default:
+        sortOption = { createdAt: -1 };
+    }
+    
     const fests = await Fest.find(query)
       .populate('hostedBy', 'name email')
       .skip(parseInt(skip))
       .limit(parseInt(limit))
-      .sort({ createdAt: -1 });
+      .sort(sortOption);
     
     const total = await Fest.countDocuments(query);
     

@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 import SuggestiveSearch from "@/components/ui/suggestive-search";
 import { ProfileButton } from "@/components/ui/profile-button";
 import Pagination from "@/components/ui/pagination";
-import { ArrowUpRight, Loader2 } from "lucide-react";
+import { ArrowUpRight, Loader2, ArrowUpDown } from "lucide-react";
 import { PlaceCard } from "@/components/ui/card-22";
 import { getAuthToken, fetchFests, type Fest } from "@/lib/api";
 
@@ -34,6 +34,7 @@ export default function EventsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedFest, setSelectedFest] = useState<Fest | null>(null);
+  const [sortBy, setSortBy] = useState<string>("newest");
 
   useEffect(() => {
     const token = getAuthToken();
@@ -50,6 +51,7 @@ export default function EventsPage() {
           skip: (currentPage - 1) * ITEMS_PER_PAGE,
           limit: ITEMS_PER_PAGE,
           search: searchTerm || undefined,
+          sort: sortBy,
         });
 
         setFests(data.fests);
@@ -67,11 +69,11 @@ export default function EventsPage() {
     }
 
     loadFests();
-  }, [currentPage, searchTerm]);
+  }, [currentPage, searchTerm, sortBy]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, sortBy]);
 
   const totalPages = Math.ceil(totalFests / ITEMS_PER_PAGE);
 
@@ -180,7 +182,26 @@ export default function EventsPage() {
             </aside>
 
             <div className="flex-1 lg:w-[70%]">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-semibold text-black">All Events</h2>
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="w-4 h-4 text-gray-600" />
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    aria-label="Sort events"
+                    className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-black text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-colors hover:border-gray-400"
+                  >
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="title_asc">Title (A-Z)</option>
+                    <option value="title_desc">Title (Z-A)</option>
+                    <option value="registrations">Most Popular</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
               {displayFests.map((event: Fest) => {
                 const isSelected = selectedFest?._id === event._id;
                 return (
