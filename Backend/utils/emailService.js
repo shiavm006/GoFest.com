@@ -1,21 +1,14 @@
-import nodemailer from "nodemailer";
 import sgMail from "@sendgrid/mail";
-sgMail.setApiKey(process.env.SENDGRID_API_KEY)
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || "smtp.gmail.com",
-  port: Number(process.env.EMAIL_PORT) || 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 export async function sendRegistrationEmail(registration) {
   const { user, fest } = registration;
 
   if (!user?.email) return;
-
+  console.log("Sending registration email to:", user.email);
   const to = user.email;
   const subject = `Registration confirmed for ${fest.title}`;
 
@@ -68,12 +61,16 @@ export async function sendRegistrationEmail(registration) {
   try {
     await sgMail.send({
       to,
-      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+      from: process.env.EMAIL_FROM || process.env.SENDGRID_FROM_EMAIL || "noreply@gofest.com",
       subject,
       html,
     });
+    console.log("Sent registration email to:", to);
   } catch (error) {
     console.error("Failed to send registration email:", error);
+    if (error.response) {
+      console.error("SendGrid error details:", error.response.body);
+    }
   }
 }
 
@@ -123,12 +120,16 @@ export async function sendOrganizerNotification(registration) {
   try {
     await sgMail.send({
       to: organizerEmail,
-      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+      from: process.env.EMAIL_FROM || process.env.SENDGRID_FROM_EMAIL || "noreply@gofest.com",
       subject,
       html,
     });
+    console.log("Sent organizer notification to:", organizerEmail);
   } catch (error) {
     console.error("Failed to send organizer notification:", error);
+    if (error.response) {
+      console.error("SendGrid error details:", error.response.body);
+    }
   }
 }
 

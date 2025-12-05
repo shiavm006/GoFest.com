@@ -2,6 +2,7 @@ import express from "express";
 import Fest from "../models/Fest.js";
 import Registration from "../models/Registration.js";
 import { authenticate } from "../middleware/auth.js";
+import { sendRegistrationEmail, sendOrganizerNotification } from "../utils/emailService.js";
 
 const router = express.Router();
 
@@ -204,8 +205,27 @@ router.post("/:id/register", authenticate, async (req, res, next) => {
     await fest.save();
     
     const populatedRegistration = await Registration.findById(registration._id)
-      .populate('fest', 'title college date location image')
-      .populate('user', 'name email');
+      .populate({
+        path: 'fest',
+        select: 'title college date location image entryType entryFee organizer',
+        populate: {
+          path: 'hostedBy',
+          select: 'name email'
+        }
+      })
+      .populate('user', 'name email college');
+    
+    try {
+      await sendRegistrationEmail(populatedRegistration);
+    } catch (emailError) {
+      console.error("Failed to send registration email:", emailError);
+    }
+
+    try {
+      await sendOrganizerNotification(populatedRegistration);
+    } catch (emailError) {
+      console.error("Failed to send organizer notification:", emailError);
+    }
     
     res.status(201).json(populatedRegistration);
   } catch (error) {
