@@ -142,7 +142,6 @@ export interface MeResponse {
   is_active: boolean;
 }
 
-// Fest API Types
 export interface Fest {
   _id: string;
   title: string;
@@ -215,7 +214,6 @@ export interface Registration {
   updatedAt: string;
 }
 
-// Fest API Functions
 export async function fetchFests(params?: {
   skip?: number;
   limit?: number;

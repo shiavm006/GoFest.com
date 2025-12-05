@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
-
+import sgMail from "@sendgrid/mail";
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || "smtp.gmail.com",
   port: Number(process.env.EMAIL_PORT) || 587,
@@ -65,7 +66,7 @@ export async function sendRegistrationEmail(registration) {
   `;
 
   try {
-    await transporter.sendMail({
+    await sgMail.send({
       to,
       from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
       subject,
@@ -120,7 +121,7 @@ export async function sendOrganizerNotification(registration) {
   `;
 
   try {
-    await transporter.sendMail({
+    await sgMail.send({
       to: organizerEmail,
       from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
       subject,

@@ -11,7 +11,6 @@ import { ArrowUpRight, Loader2 } from "lucide-react";
 import { PlaceCard } from "@/components/ui/card-22";
 import { getAuthToken, fetchFests, type Fest } from "@/lib/api";
 
-// Dynamically import map component to avoid SSR issues
 const EventsMap = dynamic(() => import("@/components/ui/events-map"), {
   ssr: false,
   loading: () => (
@@ -89,7 +88,6 @@ export default function EventsPage() {
 
   const handleFestClick = (fest: Fest) => {
     setSelectedFest(fest);
-    // Scroll to the event card if it's visible
     const element = document.getElementById(`fest-${fest._id}`);
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -98,10 +96,7 @@ export default function EventsPage() {
 
   const handleCardClick = (fest: Fest) => {
     setSelectedFest(fest);
-    // If fest has coordinates, the map will automatically focus on it
-    // Otherwise, navigate to the event page
     if (fest.location?.coordinates && fest.location.coordinates.length === 2) {
-      // Map will handle the focus via MapController
     } else {
       handleExplore(fest.slug);
     }
@@ -174,7 +169,6 @@ export default function EventsPage() {
                 </div>
         ) : (
           <div className="flex gap-8">
-            {/* Map Section - 30% */}
             <aside className="w-[30%] hidden lg:block">
               <div className="sticky top-24 h-[calc(100vh-150px)] min-h-[600px]">
                 <EventsMap
@@ -185,7 +179,6 @@ export default function EventsPage() {
               </div>
             </aside>
 
-            {/* Events List - 70% */}
             <div className="flex-1 lg:w-[70%]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
               {displayFests.map((event: Fest) => {

@@ -21,7 +21,6 @@ router.post("/signup", async (req, res, next) => {
       });
     }
     
-    // Check for duplicate email
     const existingUserByEmail = await User.findOne({ email: email.toLowerCase().trim() });
     if (existingUserByEmail) {
       return res.status(400).json({
@@ -29,7 +28,6 @@ router.post("/signup", async (req, res, next) => {
       });
     }
     
-    // Check for duplicate phone number
     if (phone) {
       const existingUserByPhone = await User.findOne({ phone: phone.trim() });
       if (existingUserByPhone) {

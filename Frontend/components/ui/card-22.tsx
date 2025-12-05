@@ -114,7 +114,6 @@ export const PlaceCard = ({
           />
         </AnimatePresence>
 
-        {/* Minimal carousel controls - subtle on hover */}
         <div className="absolute inset-0 flex items-center justify-between px-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button
             variant="ghost"
@@ -140,7 +139,6 @@ export const PlaceCard = ({
           </Button>
         </div>
 
-        {/* Top pills */}
         <div className="absolute top-3 left-3 flex gap-2">
           {tags
             .filter(Boolean)

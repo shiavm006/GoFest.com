@@ -157,7 +157,6 @@ export default function FestDetailPage() {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      {/* 1. Hero Section */}
       <section className="relative w-full h-[60vh] min-h-[420px] overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center"
@@ -207,7 +206,6 @@ export default function FestDetailPage() {
             </div>
       </section>
 
-      {/* 2. Quick Info Bar */}
       <section className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="px-6 lg:px-16 py-6 flex flex-wrap justify-between items-center gap-4">
           <div>
@@ -240,12 +238,9 @@ export default function FestDetailPage() {
         </div>
       </section>
 
-      {/* 3. Main Content */}
       <main className="px-6 lg:px-16 py-12">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-10 lg:gap-12">
-          {/* Left Column - Main Info */}
           <div className="lg:col-span-2 space-y-12">
-            {/* About */}
             <section className="space-y-3">
               <h3 className="text-lg font-semibold text-black">About {fest.title}</h3>
               <p className="text-sm md:text-base text-black leading-relaxed">
@@ -253,7 +248,6 @@ export default function FestDetailPage() {
               </p>
             </section>
 
-            {/* Location */}
             {fest.location && (
               <section className="space-y-3">
                 <h3 className="text-lg font-semibold text-black">Location</h3>
@@ -282,7 +276,6 @@ export default function FestDetailPage() {
               </section>
             )}
 
-            {/* Events Schedule */}
             {fest.events && fest.events.length > 0 && (
               <section className="space-y-3">
                 <h3 className="text-lg font-semibold text-black">Events & Activities</h3>
@@ -333,9 +326,7 @@ export default function FestDetailPage() {
             )}
           </div>
 
-          {/* Right Column - Sidebar */}
           <div className="space-y-6">
-            {/* Event Details Card */}
             <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
               <h4 className="text-sm font-semibold mb-3 text-black uppercase tracking-[0.14em]">
                 Event details
@@ -364,7 +355,6 @@ export default function FestDetailPage() {
               </div>
             </div>
             
-            {/* Organizer Card */}
             <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
               <h4 className="text-sm font-semibold mb-3 text-black uppercase tracking-[0.14em]">
                 Contact organizer
@@ -418,13 +408,12 @@ export default function FestDetailPage() {
             </div>
             </div>
 
-            {/* Resources */}
             {(fest.website || fest.brochure) && (
               <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
                 <h4 className="text-lg font-semibold mb-4 text-black">Resources</h4>
                 <div className="space-y-3">
                   {fest.website && (
-                    <a
+              <a
                       href={fest.website}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -440,10 +429,10 @@ export default function FestDetailPage() {
                   {fest.brochure && (
                     <a
                       href={fest.brochure}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                target="_blank"
+                rel="noopener noreferrer"
                       className="flex items-center justify-between p-3 bg-gray-50 hover:bg-blue-50 rounded-lg transition-all group text-blue-600 hover:text-blue-700"
-                    >
+              >
                       <div className="flex items-center gap-2">
                         <Download className="w-4 h-4" />
                         <span className="text-sm font-medium">Download Brochure</span>

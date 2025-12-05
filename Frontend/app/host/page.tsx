@@ -513,7 +513,6 @@ export default function HostFestPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-12">
-            {/* Basic Information */}
             <section className="space-y-4 bg-white p-8 rounded-xl shadow-sm border border-gray-200">
               <div className="flex items-center gap-3 mb-6">
                 <Calendar className="w-6 h-6 text-black" />
@@ -614,7 +613,6 @@ export default function HostFestPage() {
               </div>
             </section>
 
-            {/* Location */}
             <section className="space-y-4 bg-white p-8 rounded-xl shadow-sm border border-gray-200">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -664,7 +662,6 @@ export default function HostFestPage() {
               </div>
             </section>
 
-            {/* Organizer Details */}
             <section className="space-y-4 bg-white p-8 rounded-xl shadow-sm border border-gray-200">
               <div className="flex items-center gap-3 mb-6">
                 <Users className="w-6 h-6 text-black" />
@@ -733,7 +730,6 @@ export default function HostFestPage() {
               </div>
             </section>
 
-            {/* Images & Media */}
             <section className="space-y-4 bg-white p-8 rounded-xl shadow-sm border border-gray-200">
               <div className="flex items-center gap-3 mb-6">
                 <Image className="w-6 h-6 text-black" />
@@ -782,7 +778,6 @@ export default function HostFestPage() {
               </div>
             </section>
 
-            {/* Pricing */}
             <section className="space-y-4 bg-white p-8 rounded-xl shadow-sm border border-gray-200">
               <div className="flex items-center gap-3 mb-6">
                 <IndianRupee className="w-6 h-6 text-black" />
@@ -822,7 +817,6 @@ export default function HostFestPage() {
               </div>
             </section>
 
-            {/* Events */}
             <section className="space-y-4 bg-white p-8 rounded-xl shadow-sm border border-gray-200">
               <div className="flex items-center gap-3 mb-6">
                 <Plus className="w-6 h-6 text-black" />

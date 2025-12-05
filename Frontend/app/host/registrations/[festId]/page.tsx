@@ -28,11 +28,9 @@ export default function FestRegistrationsPage() {
         setIsLoading(true);
         setError(null);
 
-        // Fetch registrations first (this will validate permission)
         const regs = await getFestRegistrations(festId);
         setRegistrations(regs);
 
-        // Get fest details from the first registration if available
         if (regs.length > 0 && regs[0].fest) {
           setFest(regs[0].fest as Fest);
         }
@@ -118,7 +116,6 @@ export default function FestRegistrationsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="px-6 lg:px-16 py-5 flex justify-between items-center">
           <Link
@@ -133,14 +130,12 @@ export default function FestRegistrationsPage() {
             Gofest.com
           </Link>
 
-          <div className="w-24" /> {/* Spacer for centering */}
+          <div className="w-24" />
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="px-6 lg:px-16 py-12">
         <div className="max-w-6xl mx-auto">
-          {/* Fest Info Header */}
           <div className="mb-8">
             <div className="flex items-start justify-between mb-4">
               <div>
@@ -165,7 +160,6 @@ export default function FestRegistrationsPage() {
             </div>
           </div>
 
-          {/* Registrations List */}
           {registrations.length === 0 ? (
             <div className="text-center py-16 border border-gray-200 rounded-lg bg-gray-50">
               <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />

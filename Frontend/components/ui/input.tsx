@@ -27,7 +27,6 @@ interface InputProps {
   ref?: React.RefObject<HTMLInputElement | null>;
   className?: string;
   wrapperClassName?: string;
-  // Allow arbitrary HTML input props without using `any`
   [key: string]: unknown;
 }
 

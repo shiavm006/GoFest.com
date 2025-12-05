@@ -77,7 +77,6 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Leaflet map styles */
 .leaflet-container {
   font-family: inherit;
   z-index: 0;
@@ -101,7 +100,6 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Custom red marker styles */
 .custom-red-marker {
   background: transparent !important;
   border: none !important;
@@ -116,7 +114,6 @@ body {
   transform: scale(1.1);
 }
 
-/* Custom popup styles */
 .custom-popup .popup-content {
   padding: 12px 16px;
   min-width: 200px;
@@ -161,7 +158,6 @@ body {
   gap: 4px;
 }
 
-/* Map container styles */
 .map-container {
   background: #f9fafb;
 }
@@ -170,7 +166,6 @@ body {
   border-radius: 8px;
 }
 
-/* Leaflet control styles */
 .leaflet-control-zoom {
   border: 1px solid #d1d5db !important;
   border-radius: 8px !important;

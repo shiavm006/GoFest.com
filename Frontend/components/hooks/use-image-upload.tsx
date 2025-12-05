@@ -59,22 +59,18 @@ export function useImageUpload({ onUpload }: UseImageUploadProps = {}) {
       setUploadError(null);
       setIsUploading(true);
 
-      // Create local preview immediately
       const localUrl = URL.createObjectURL(file);
       setPreviewUrl(localUrl);
       previewRef.current = localUrl;
 
       try {
-        // Upload to Cloudinary
         const cloudinaryUrl = await uploadToCloudinary(file);
         
-        // Update with Cloudinary URL
         setPreviewUrl(cloudinaryUrl);
         previewRef.current = cloudinaryUrl;
         onUpload?.(cloudinaryUrl);
       } catch (error: any) {
         setUploadError(error.message);
-        // Revert to local preview on error
         setPreviewUrl(localUrl);
         console.error("Upload error:", error);
       } finally {
